@@ -1,0 +1,587 @@
+<?xml version="1.0"?>
+<config>
+  <Application>
+    Tyfon
+  </Application>
+
+  <PipelineList>
+    <VenteloPipe>
+      <Active>True</Active>
+    </VenteloPipe>
+
+    <TelavoxPipe>
+      <Active>True</Active>
+    </TelavoxPipe>
+
+    <ProvisioningLoader>
+      <Active>True</Active>
+    </ProvisioningLoader>
+    
+    <FraudPipe>
+      <Active>True</Active>
+    </FraudPipe>
+  </PipelineList>
+
+  <VenteloPipe>
+    <InputAdapter>
+      <CInpAdapter>
+        <ClassName>Tyfon.VenteloInputAdapter</ClassName>
+        <BatchSize>5000</BatchSize>
+        <InputFilePath>Data/Tyfon</InputFilePath>
+        <InputFilePrefix>IP_VCP_</InputFilePrefix>
+        <InputFileSuffix>.txt</InputFileSuffix>
+        <DoneFilePath>Data/Tyfon</DoneFilePath>
+        <DoneFilePrefix>IP_VCP_</DoneFilePrefix>
+        <DoneFileSuffix>.done</DoneFileSuffix>
+        <ErrFilePath>Data/Tyfon</ErrFilePath>
+        <ErrFilePrefix>IP_VCP_</ErrFilePrefix>
+        <ErrFileSuffix>.err</ErrFileSuffix>
+      </CInpAdapter>
+    </InputAdapter>
+
+    <Process>
+      <!-- Detect markup cases -->
+      <CallScenarioLookup>
+        <ClassName>Tyfon.CallScenarioLookup</ClassName>
+        <DataCache>CallScenarioCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </CallScenarioLookup>
+
+      <!-- Lookup the customer -->
+      <CustomerLookup>
+        <ClassName>Tyfon.CustomerLookup</ClassName>
+        <DataCache>CustomerCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </CustomerLookup>
+
+      <!-- Find the hierarchy of price plans -->
+      <PriceHierarchyLookup>
+        <ClassName>Tyfon.PriceHierarchyLookup</ClassName>
+        <DataCache>PriceHierarchyCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </PriceHierarchyLookup>
+
+      <!-- Identify premium calls -->
+      <PremiumLookup>
+        <ClassName>Tyfon.PremiumLookup</ClassName>
+        <DataCache>PremiumCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </PremiumLookup>
+
+      <!-- Create the charge packets - done here to allow time splitting -->
+      <ChargePacketCreation>
+        <ClassName>Tyfon.ChargePacketCreation</ClassName>
+        <BatchSize>5000</BatchSize>
+      </ChargePacketCreation>
+
+      <!-- Look up the destination zone, category and mobile/fixed status -->
+      <ZoneLookup>
+        <ClassName>Tyfon.ZoneLookup</ClassName>
+        <DataCache>ZoneCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </ZoneLookup>
+
+      <!-- Lookup the time zone -->
+      <TimeLookup>
+        <ClassName>Tyfon.TimeLookup</ClassName>
+        <DataCache>TimeCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </TimeLookup>
+
+      <!-- Lookup the price to use -->
+      <PriceLookup>
+        <ClassName>Tyfon.PriceLookup</ClassName>
+        <DataCache>PriceLookupCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </PriceLookup>
+
+      <!-- Perform rating -->
+      <RateLookup>
+        <ClassName>Tyfon.Rating</ClassName>
+        <DataCache>RateCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </RateLookup>
+
+      <!-- Rollup and round rating results -->
+      <RateRounding>
+        <ClassName>Tyfon.RateRounding</ClassName>
+        <BatchSize>5000</BatchSize>
+      </RateRounding>
+
+      <!-- Output record guiding -->
+      <SuspensePreparation>
+        <ClassName>Tyfon.SuspensePreparation</ClassName>
+        <DataCache>SuspensePreparationCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </SuspensePreparation>
+
+      <!-- Dump Diagnostic Information -->
+      <DumpFirst>
+        <ClassName>OpenRate.process.Dump</ClassName>
+        <Active>True</Active>
+        <DumpType>All</DumpType>
+        <DumpFilePath>Data/Tyfon</DumpFilePath>
+        <DumpFilePrefix>IP_VCP_</DumpFilePrefix>
+        <DumpFileSuffix>.dump</DumpFileSuffix>
+        <BatchSize>5000</BatchSize>
+      </DumpFirst>
+    </Process>
+
+    <OutputAdapter>
+      <CGoodOutAdapter>
+        <ClassName>Tyfon.XMLOutputAdapter</ClassName>
+        <OutputName>GoodOutput</OutputName>
+        <BatchSize>5000</BatchSize>
+        <MaxSleep>50</MaxSleep>
+        <OutputFilePath>Data/Tyfon</OutputFilePath>
+        <OutputFilePrefix>callfile-</OutputFilePrefix>
+        <OutputFileSuffix>.xml</OutputFileSuffix>
+        <SingleOutputFile>True</SingleOutputFile>
+      </CGoodOutAdapter>
+
+      <CSuspOutAdapter>
+        <ClassName>Tyfon.TyfonOutputSuspenseAdapter</ClassName>
+        <OutputName>SuspenseOutput</OutputName>
+        <BatchSize>5000</BatchSize>
+        <MaxSleep>50</MaxSleep>
+        <OutputFilePath>Data/Tyfon</OutputFilePath>
+        <OutputFilePrefix>IP_VCP_</OutputFilePrefix>
+        <OutputFileSuffix>.reject</OutputFileSuffix>
+        <DeleteEmptyOutputFile>True</DeleteEmptyOutputFile>
+        <SingleOutputFile>True</SingleOutputFile>
+      </CSuspOutAdapter>
+
+    </OutputAdapter>
+  </VenteloPipe>
+
+  <TelavoxPipe>
+    <InputAdapter>
+      <CInpAdapter>
+        <ClassName>Tyfon.TelavoxInputAdapter</ClassName>
+        <BatchSize>5000</BatchSize>
+        <InputFilePath>Data/Tyfon</InputFilePath>
+        <InputFilePrefix>IPORG_</InputFilePrefix>
+        <InputFileSuffix>.txt</InputFileSuffix>
+        <DoneFilePath>Data/Tyfon</DoneFilePath>
+        <DoneFilePrefix>IPORG_</DoneFilePrefix>
+        <DoneFileSuffix>.done</DoneFileSuffix>
+        <ErrFilePath>Data/Tyfon</ErrFilePath>
+        <ErrFilePrefix>IPORG_</ErrFilePrefix>
+        <ErrFileSuffix>.err</ErrFileSuffix>
+      </CInpAdapter>
+    </InputAdapter>
+
+    <Process>
+      <!-- Detect markup cases -->
+      <CallScenarioLookup>
+        <ClassName>Tyfon.CallScenarioLookup</ClassName>
+        <DataCache>CallScenarioCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </CallScenarioLookup>
+
+      <!-- Lookup the customer -->
+      <CustomerLookup>
+        <ClassName>Tyfon.CustomerLookup</ClassName>
+        <DataCache>CustomerCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </CustomerLookup>
+
+      <!-- Find the hierarchy of price plans -->
+      <PriceHierarchyLookup>
+        <ClassName>Tyfon.PriceHierarchyLookup</ClassName>
+        <DataCache>PriceHierarchyCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </PriceHierarchyLookup>
+
+      <!-- Identify premium calls -->
+      <PremiumLookup>
+        <ClassName>Tyfon.PremiumLookup</ClassName>
+        <DataCache>PremiumCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </PremiumLookup>
+
+      <!-- Create the charge packets - done here to allow time splitting -->
+      <ChargePacketCreation>
+        <ClassName>Tyfon.ChargePacketCreation</ClassName>
+        <BatchSize>5000</BatchSize>
+      </ChargePacketCreation>
+
+      <!-- Look up the destination zone, category and mobile/fixed status -->
+      <ZoneLookup>
+        <ClassName>Tyfon.ZoneLookup</ClassName>
+        <DataCache>ZoneCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </ZoneLookup>
+
+      <!-- Lookup the time zone -->
+      <TimeLookup>
+        <ClassName>Tyfon.TimeLookup</ClassName>
+        <DataCache>TimeCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </TimeLookup>
+
+      <!-- Lookup the price to use -->
+      <PriceLookup>
+        <ClassName>Tyfon.PriceLookup</ClassName>
+        <DataCache>PriceLookupCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </PriceLookup>
+
+      <!-- Perform rating -->
+      <RateLookup>
+        <ClassName>Tyfon.Rating</ClassName>
+        <DataCache>RateCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </RateLookup>
+
+      <!-- Rollup and round rating results -->
+      <RateRounding>
+        <ClassName>Tyfon.RateRounding</ClassName>
+        <BatchSize>5000</BatchSize>
+      </RateRounding>
+
+      <!-- Output record guiding -->
+      <SuspensePreparation>
+        <ClassName>Tyfon.SuspensePreparation</ClassName>
+        <DataCache>SuspensePreparationCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </SuspensePreparation>
+
+      <!-- Dump Diagnostic Information -->
+      <DumpFirst>
+        <ClassName>OpenRate.process.Dump</ClassName>
+        <Active>True</Active>
+        <DumpType>All</DumpType>
+        <DumpFilePath>Data/Tyfon</DumpFilePath>
+        <DumpFilePrefix>IPORG_</DumpFilePrefix>
+        <DumpFileSuffix>.dump</DumpFileSuffix>
+        <BatchSize>5000</BatchSize>
+      </DumpFirst>
+    </Process>
+
+    <OutputAdapter>
+      <CGoodOutAdapter>
+        <ClassName>Tyfon.XMLOutputAdapter</ClassName>
+        <OutputName>GoodOutput</OutputName>
+        <BatchSize>5000</BatchSize>
+        <MaxSleep>50</MaxSleep>
+        <OutputFilePath>Data/Tyfon</OutputFilePath>
+        <OutputFilePrefix>callfile-</OutputFilePrefix>
+        <OutputFileSuffix>.xml</OutputFileSuffix>
+        <SingleOutputFile>True</SingleOutputFile>
+      </CGoodOutAdapter>
+
+      <CSuspOutAdapter>
+        <ClassName>Tyfon.TyfonOutputSuspenseAdapter</ClassName>
+        <OutputName>SuspenseOutput</OutputName>
+        <BatchSize>5000</BatchSize>
+        <MaxSleep>50</MaxSleep>
+        <OutputFilePath>Data/Tyfon</OutputFilePath>
+        <OutputFilePrefix>IPORG_</OutputFilePrefix>
+        <OutputFileSuffix>.reject</OutputFileSuffix>
+        <DeleteEmptyOutputFile>True</DeleteEmptyOutputFile>
+        <SingleOutputFile>True</SingleOutputFile>
+      </CSuspOutAdapter>
+
+    </OutputAdapter>
+  </TelavoxPipe>
+
+  <!--========================================================-->
+  <!--  used for processing records from provisioning files   -->
+  <!--========================================================-->
+  <ProvisioningLoader>
+    <InputAdapter>
+      <ProvInputAdapter>
+        <ClassName>Provisioning.ProvInputAdapterFlat</ClassName>
+        <BatchSize>5000</BatchSize>
+        <InputFilePath>Data/Tyfon/Provisioning</InputFilePath>
+        <InputFilePrefix>voipAccountInformation</InputFilePrefix>
+        <InputFileSuffix>.xml</InputFileSuffix>
+        <DoneFilePath>Data/Tyfon/Provisioning/done</DoneFilePath>
+        <DoneFilePrefix>voipAccountInformation</DoneFilePrefix>
+        <DoneFileSuffix>.done</DoneFileSuffix>
+        <ErrFilePath>Data/Tyfon/Provisioning/err</ErrFilePath>
+        <ErrFilePrefix>voipAccountInformation</ErrFilePrefix>
+        <ErrFileSuffix>.err</ErrFileSuffix>
+      </ProvInputAdapter>
+    </InputAdapter>
+
+    <Process>
+      <DumpProv>
+        <ClassName>OpenRate.process.Dump</ClassName>
+        <Active>True</Active>
+        <DumpType>All</DumpType>
+        <DumpFilePath>Data/Tyfon/Provisioning</DumpFilePath>
+        <DumpFilePrefix>voipAccountInformation</DumpFilePrefix>
+        <DumpFileSuffix>.dump</DumpFileSuffix>
+        <BatchSize>5000</BatchSize>
+      </DumpProv>
+    </Process>
+
+    <OutputAdapter>
+      <OssSubscriberOutputAdapter>
+        <ClassName>Provisioning.ProvOutputAdapter</ClassName>
+        <RecordType>30</RecordType>
+        <OutputName>default</OutputName>
+        <BatchSize>5000</BatchSize>
+        <MaxSleep>50</MaxSleep>
+        <DataSource>TyfonDB</DataSource>
+        <ValidateStatement>select 1 from DUAL</ValidateStatement>
+        <InitStatement>select 1 from DUAL</InitStatement>
+        <RecordInsertStatement>CALL sp_UpsertProvRecord(?,?,?,?,?,?,?,?)</RecordInsertStatement>
+        <CommitStatement>call sp_MungeTables();</CommitStatement>
+        <RollbackStatement></RollbackStatement>
+      </OssSubscriberOutputAdapter>
+    </OutputAdapter>
+  </ProvisioningLoader>
+
+  <FraudPipe>
+    <InputAdapter>
+      <CInpAdapter>
+        <ClassName>fraud.FraudInputAdapter</ClassName>
+        <BatchSize>5000</BatchSize>
+        <InputFilePath>Data/Fraud</InputFilePath>
+        <InputFilePrefix>transcoder</InputFilePrefix>
+        <InputFileSuffix>.csv</InputFileSuffix>
+        <DoneFilePath>Data/Fraud</DoneFilePath>
+        <DoneFilePrefix>transcoder</DoneFilePrefix>
+        <DoneFileSuffix>.done</DoneFileSuffix>
+        <ErrFilePath>Data/Fraud</ErrFilePath>
+        <ErrFilePrefix>transcoder</ErrFilePrefix>
+        <ErrFileSuffix>.err</ErrFileSuffix>
+      </CInpAdapter>
+    </InputAdapter>
+
+    <Process>
+      <!-- Lookup the customer -->
+      <CustomerLookup>
+        <ClassName>Tyfon.CustomerLookup</ClassName>
+        <DataCache>CustomerCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </CustomerLookup>
+
+      <!-- Identify premium calls -->
+      <PremiumLookup>
+        <ClassName>Tyfon.PremiumLookup</ClassName>
+        <DataCache>PremiumCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </PremiumLookup>
+
+      <!-- Look up the destination zone, category and mobile/fixed status -->
+      <ZoneLookup>
+        <ClassName>Tyfon.ZoneLookup</ClassName>
+        <DataCache>ZoneCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </ZoneLookup>
+
+      <!-- Calculate the new daily limit -->
+      <DailyLimitCheck>
+        <ClassName>fraud.FraudKeyCalculation</ClassName>
+        <DataCache>DailyBalanceCache</DataCache>
+        <BatchSize>5000</BatchSize>
+        <MonthlyTotalDurationLimit>500000</MonthlyTotalDurationLimit>
+        <DailyTotalDurationLimit>100000</DailyTotalDurationLimit>
+        <HourlyTotalDurationLimit>10000</HourlyTotalDurationLimit>
+        <MonthlyCallTypeDurationLimit>100000</MonthlyCallTypeDurationLimit>
+        <DailyCallTypeDurationLimit>100000</DailyCallTypeDurationLimit>
+        <HourlyCallTypeDurationLimit>10000</HourlyCallTypeDurationLimit>
+        <MonthlyTotalCountLimit>2000</MonthlyTotalCountLimit>
+        <DailyTotalCountLimit>200</DailyTotalCountLimit>
+        <HourlyTotalCountLimit>30</HourlyTotalCountLimit>
+        <MonthlyCallTypeCountLimit>800</MonthlyCallTypeCountLimit>
+        <DailyCallTypeCountLimit>80</DailyCallTypeCountLimit>
+        <HourlyCallTypeCountLimit>20</HourlyCallTypeCountLimit>
+      </DailyLimitCheck>
+
+      <!-- Detect if we crossed the notification threshold  -->
+      <!--LimitCrossNotification>
+        <ClassName>fraud.FraudNotification</ClassName>
+        <DataCache>EmailNotificationCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </LimitCrossNotification-->
+
+      <DumpFraud>
+        <ClassName>OpenRate.process.Dump</ClassName>
+        <Active>True</Active>
+        <DumpType>All</DumpType>
+        <DumpFilePath>Data/Fraud</DumpFilePath>
+        <DumpFilePrefix>transcoder</DumpFilePrefix>
+        <DumpFileSuffix>.dump</DumpFileSuffix>
+        <BatchSize>5000</BatchSize>
+      </DumpFraud>
+    </Process>
+
+    <OutputAdapter>
+      <FGoodOutAdapter>
+        <ClassName>fraud.XMLOutputAdapter</ClassName>
+        <OutputName>GoodOutput</OutputName>
+        <BatchSize>5000</BatchSize>
+        <MaxSleep>50</MaxSleep>
+        <OutputFilePath>Data/Fraud</OutputFilePath>
+        <OutputFilePrefix>alertfile-</OutputFilePrefix>
+        <OutputFileSuffix>.xml</OutputFileSuffix>
+        <SingleOutputFile>True</SingleOutputFile>
+        <DeleteEmptyOutputFile>False</DeleteEmptyOutputFile>
+      </FGoodOutAdapter>
+    </OutputAdapter>
+  </FraudPipe>
+  
+  <Resource>
+    <LogFactory>
+      <ClassName>OpenRate.logging.LogFactory</ClassName>
+      <Properties>logTyfon.properties</Properties>
+      <DefaultCategory>ConfigTest</DefaultCategory>
+    </LogFactory>
+
+    <ECI>
+      <ClassName>OpenRate.configurationmanager.EventHandler</ClassName>
+      <Port>8086</Port>
+      <MaxConnection>2</MaxConnection>
+      <SemaphoreFile>Semaphore/Semaphore.txt</SemaphoreFile>
+    </ECI>
+
+    <TransactionManagerFactory>
+      <ClassName>OpenRate.transaction.TransactionManagerFactory</ClassName>
+    </TransactionManagerFactory>
+
+    <!-- Conversion Cache allows us to cache heavy coversion objects -->
+    <ConversionCache>
+      <ClassName>OpenRate.resource.ConversionCache</ClassName>
+    </ConversionCache>
+
+    <!--EmailNotificationCache>
+      <ClassName>OpenRate.resource.notification.EmailNotificationCache</ClassName>
+      <Server>mail.tyfon.net</Server>
+      <Port>25</Port>
+      <UserName>openrate@tyfon.net</UserName>
+      <PassWord>openrate</PassWord>
+      <MailTo>ian@open-rate.com</MailTo>
+      <MailFrom>ian@open-rate.com</MailFrom>
+      <MailCC>ian.sparkes@gmail.com</MailCC>
+      <MailCCName>Ian</MailCCName>
+      <MailFromName>OpenRate Tyfon</MailFromName>
+      <SSLAuthentication>true</SSLAuthentication>
+      <NotifyStartAndStop>false</NotifyStartAndStop>
+      <NotificationID>Tyfon</NotificationID>
+    </EmailNotificationCache-->
+
+    <DataSourceFactory>
+      <ClassName>OpenRate.resource.DataSourceFactory</ClassName>
+      <DataSourceBuilder>
+        <ClassName>OpenRate.db.C3P0DataSource</ClassName>
+      </DataSourceBuilder>
+      <DataSource>
+        <TyfonDB>
+          <Name>TyfonDB</Name>
+          <db_url>jdbc:mysql://localhost:3306/TyfonDB</db_url>
+          <!--db_url>jdbc:mysql://lnx1/bolaget</db_url-->
+	        <!--db_url>jdbc:mysql://lnx1/tyfoncrm?zeroDateTimeBehavior=convertToNull</db_url>-->
+          <driver>com.mysql.jdbc.Driver</driver>
+          <!--username>crm_reader</username-->
+          <!--password>systembolaget</password-->
+          <username>openrate</username>
+          <password>openrate</password>
+          <ValidationQuery>select 1 from dual</ValidationQuery>
+          <InitQuery>select 1 from dual</InitQuery>
+        </TyfonDB>
+      </DataSource>
+    </DataSourceFactory>
+
+    <CacheFactory>
+      <ClassName>OpenRate.resource.CacheFactory</ClassName>
+      <ModuleName>CacheFactory</ModuleName>
+      <CacheableClass>
+        <CallScenarioCache>
+          <ClassName>OpenRate.cache.RegexMatchCache</ClassName>
+          <DataSourceType>DB</DataSourceType>
+          <DataSource>TyfonDB</DataSource>
+          <SelectStatement>select MAP_GROUP,TRAFFIC_CASE,RESULT from CALL_SCENARIO_MAP</SelectStatement>
+        </CallScenarioCache>
+
+        <PriceHierarchyCache>
+          <ClassName>OpenRate.cache.RegexMatchCache</ClassName>
+          <DataSourceType>DB</DataSourceType>
+          <DataSource>TyfonDB</DataSource>
+          <SelectStatement>select 'Default',PRICE_PLAN,PLAN_HIERARCHY,PRIORITY from PRICE_PLAN_HIERARCHY</SelectStatement>
+          <KeyFields>1</KeyFields>
+        </PriceHierarchyCache>
+
+        <ZoneCache>
+          <ClassName>OpenRate.cache.BestMatchCache</ClassName>
+          <DataSourceType>DB</DataSourceType>
+          <DataSource>TyfonDB</DataSource>
+          <SelectStatement>select MAP_GROUP,PREFIX,ZONE_RESULT,DESCRIPTION,CATEGORY,TYPE from DESTINATION_MAP</SelectStatement>
+        </ZoneCache>
+
+        <PremiumCache>
+          <ClassName>OpenRate.cache.RegexMatchCache</ClassName>
+          <DataSourceType>File</DataSourceType>
+          <DataFile>ConfigData/Tyfon/PremiumNumbers.dat</DataFile>
+        </PremiumCache>
+
+        <TimeCache>
+          <ClassName>OpenRate.cache.TimeModelCache</ClassName>
+          <DataSourceType>File</DataSourceType>
+          <DataFile>ConfigData/Tyfon/TimeModel.dat</DataFile>
+        </TimeCache>
+
+        <PriceLookupCache>
+          <ClassName>OpenRate.cache.RegexMatchCache</ClassName>
+          <DataSourceType>DB</DataSourceType>
+          <DataSource>TyfonDB</DataSource>
+          <SelectStatement>select MAP_GROUP,ZONE_RESULT,TIME_RESULT,PRICE_GROUP from PRICE_MAP</SelectStatement>
+        </PriceLookupCache>
+
+        <!-- holds the rating information -->
+        <RateCache>
+          <ClassName>OpenRate.cache.RUMRateCache</ClassName>
+          <DataSourceType>DB</DataSourceType>
+          <DataSource>TyfonDB</DataSource>
+          <PriceModelStatement>select PRICE_MODEL,STEP,TIER_FROM,TIER_TO,BEAT,FACTOR,CHARGE_BASE from PRICE_MODEL</PriceModelStatement>
+          <RUMMapStatement>select PRICE_GROUP,PRICE_MODEL,RUM,RESOURCE,RUM_TYPE,RESOURCE_ID,CONSUME_FLAG from RUM_MAP order by STEP</RUMMapStatement>
+        </RateCache>
+
+        <TyfonMarkupCache>
+          <ClassName>OpenRate.cache.IndexedLookupCache</ClassName>
+          <DataSourceType>File</DataSourceType>
+          <DataFile>ConfigData/Tyfon/TyfonMarkup.dat</DataFile>
+          <ObjectFields>6</ObjectFields>
+          <IndexFields>1</IndexFields>
+          <IndexField>
+            <Index0>
+              0
+            </Index0>
+          </IndexField>
+        </TyfonMarkupCache>
+
+        <CustomerCache>
+          <ClassName>OpenRate.cache.CustomerCacheAudited</ClassName>
+          <DataSourceType>DB</DataSourceType>
+          <DataSource>TyfonDB</DataSource>
+          <AliasSelectStatement>select ALIAS_ID,NUMBER,CUSTOMER_ID,SUBSCRIPTION_ID,SEGMENT_VALID_FROM,SEGMENT_VALID_TO,ModT from VOIP_SERV_ALIAS where ModT &gt; ? order by SEGMENT_VALID_FROM</AliasSelectStatement>
+          <AuditSegmentSelectStatement>select AUDIT_SEGMENT_ID,CUSTOMER_ID,CUSTOMER_EXT_ID,AUDIT_SEGMENT_VALID_FROM,SEGMENT_VALID_FROM,SEGMENT_VALID_TO,ModT from VOIP_SERV_AUDIT where ModT &gt; ?</AuditSegmentSelectStatement>
+          <ProductSelectStatement>select AUDIT_SEGMENT_ID, PRODUCT_ID, PRODUCT_NAME, SUBSCRIPTION_ID, SERVICE, VALID_FROM, VALID_TO, ModT from VOIP_SERV_PRODUCT where ModT &gt; ?</ProductSelectStatement>
+          <ERASelectStatement>select * from VOIP_SERVICES where number='999999' and ModT = ?</ERASelectStatement>
+        </CustomerCache>
+        
+        <!-- used to steer errors to the correct sort of output -->
+        <SuspensePreparationCache>
+          <ClassName>OpenRate.cache.RegexMatchCache</ClassName>
+          <DataSourceType>DB</DataSourceType>
+          <DataSource>TyfonDB</DataSource>
+          <SelectStatement>select MAP_GROUP, ERROR_CODE, OUTPUT_NAME from SUSPENSE_MAP order by RANK</SelectStatement>
+          <KeyFields>1</KeyFields>
+        </SuspensePreparationCache>
+
+        <!-- Persistent store for remembering daily balances -->
+        <DailyBalanceCache>
+          <ClassName>OpenRate.cache.PersistentIndexedObject</ClassName>
+          <DataSourceType>File</DataSourceType>
+          <DataFile>Data/daily_balance.dat</DataFile>
+        </DailyBalanceCache>
+
+      </CacheableClass>
+    </CacheFactory>
+
+  </Resource>
+</config>
