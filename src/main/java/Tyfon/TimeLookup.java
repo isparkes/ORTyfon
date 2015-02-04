@@ -60,58 +60,42 @@ package Tyfon;
 import OpenRate.process.AbstractTimeMatch;
 import OpenRate.record.ChargePacket;
 import OpenRate.record.IRecord;
+import OpenRate.record.TimePacket;
 
 /**
- * This class is a bit of a fat Filter, doing all of the Pollux logic evaluation
- * and slection in one go. It uses information from three cache objects
- * to evaluate the logic candidate to use for the rating
+ * Look up the time zone of each record. Because we are not doing time splitting
+ * we know that this will result in no time splitting, so therefore we can use
+ * the simplified process of just assigning the time zone directly into the time
+ * packet.
+ * 
+ * Only the TimeResult field is read by rating so we will only put information
+ * in that field.
  */
-public class TimeLookup extends AbstractTimeMatch
-{
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: TimeLookup.java,v $, $Revision: 1.3 $, $Date: 2012-10-17 18:14:23 $";
-
+public class TimeLookup extends AbstractTimeMatch {
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------
 
- /**
-  * This is called when a data record is encountered. You should do any normal
-  * processing here.
-  */
   @Override
-  public IRecord procValidRecord(IRecord r)
-  {
+  public IRecord procValidRecord(IRecord r) {
     TyfonRecord CurrentRecord = (TyfonRecord) r;
-    
-    // We only transform the detail records, and leave the others alone
-    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD))
-    {
+
+    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
       // Put the time result into the charge packets
-      for (int idx = 0 ; idx < CurrentRecord.getChargePacketCount() ; idx++)
-      {
-        ChargePacket tmpCP = CurrentRecord.getChargePacket(idx);
-        CurrentRecord.TimeZone = getTimeZone(tmpCP.timeModel,CurrentRecord.UTCEventDate);
-        tmpCP.timeResult = CurrentRecord.TimeZone;
+      for (ChargePacket tmpCP : CurrentRecord.getChargePackets()) {
+        CurrentRecord.TimeZone = getTimeZone(tmpCP.timeModel, CurrentRecord.UTCEventDate);
+        TimePacket tmpTZ = new TimePacket();
+        tmpTZ.TimeResult = CurrentRecord.TimeZone;
+        tmpCP.addTimeZone(tmpTZ);
       }
     }
 
     return r;
   }
 
- /**
-  * This is called when a data record with errors is encountered. You should do
-  * any processing here that you have to do for error records, e.g. stratistics,
-  * special handling, even error correction!
-  */
   @Override
-  public IRecord procErrorRecord(IRecord r)
-  {
+  public IRecord procErrorRecord(IRecord r) {
     return r;
   }
 }

@@ -48,13 +48,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: FraudBalance.java,v $
- * Revision 1.1  2014-05-24 11:21:24  ian
- * First version fraud
- *
- * ====================================================================
- */
 package fraud;
 
 import java.io.Serializable;
@@ -66,6 +59,8 @@ import java.util.Date;
  * @author marco
  */
 public class FraudBalance implements Serializable {
+
+  private static final long serialVersionUID = 347934L;
 
   private Double Currentbal;
   private Date lastUpdateDateDate;

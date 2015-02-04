@@ -48,13 +48,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: SuspensePreparation.java,v $
- * Revision 1.1  2012-10-17 18:14:24  ian
- * Update for release
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.process.AbstractRegexMatch;
@@ -63,75 +56,44 @@ import OpenRate.record.IRecord;
 import OpenRate.record.RecordError;
 
 /**
- * This module inspects records with an error, and sends the error record to
- * the output that is defined in the suspense map. This allows the categorisation
- * of errors.
+ * This module inspects records with an error, and sends the error record to the
+ * output that is defined in the suspense map. This allows errors to be put into
+ * categories.
  *
  * @author afzaal
  */
-public class SuspensePreparation 
-  extends AbstractRegexMatch
-{
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: SuspensePreparation.java,v $, $Revision: 1.1 $, $Date: 2012-10-17 18:14:24 $";
+public class SuspensePreparation
+        extends AbstractRegexMatch {
 
-	// Used for the lookup
-  private String[] tmpSearchParameters = new String[1];
-  
+  // Used for the lookup
+  private final String[] tmpSearchParameters = new String[1];
+
   // Used to handle multiple outputs
-  private String [] outputList;
-  
+  private String[] outputList;
+
   // Output definitions
-  private static final String GOOD_OUTPUT     = "GoodOutput";
-  private static final String BAL_OUTPUT      = "BalanceOutput";
+  private static final String GOOD_OUTPUT = "GoodOutput";
+  private static final String BAL_OUTPUT = "BalanceOutput";
   private static final String SUSPENSE_OUTPUT = "SuspenseOutput";
 
- /**
-  * Default Constructor
-  */
-  public SuspensePreparation()
-  {
-    super();
-  }
-  
- /**
-  * This is called when a data record is encountered. You should do any normal
-  * processing here.
-  *
-  * @param r The record we are working on
-  * @return The processed record
-  */
   @Override
-  public IRecord procValidRecord(IRecord r)
-  {      
+  public IRecord procValidRecord(IRecord r) {
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
     // We only transform the detail records, and leave the others alone
-    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD))
-    {
+    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
       // set the good output
       CurrentRecord.addOutput(GOOD_OUTPUT);
       //CurrentRecord.addOutput(BAL_OUTPUT);
     }
 
-	  return r;
+    return r;
   }
-  
- /**
-  * Error record processing: Look up the output to send the error to.
-  * 
-  * @param r The record we are working on
-  * @return The processed record
-  */
+
   @Override
-  public IRecord procErrorRecord(IRecord r)
-  {
-	  String RegexGroup;
+  public IRecord procErrorRecord(IRecord r) {
+    String RegexGroup;
     String RegexResult;
     RecordError tmpError;
     String ErrorDescription;
@@ -139,12 +101,10 @@ public class SuspensePreparation
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
     // We only transform the detail records, and leave the others alone
-    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD))
-    {
+    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
       // see if the record has errors
-      if (CurrentRecord.getErrorCount() > 0)
-      {
+      if (CurrentRecord.getErrorCount() > 0) {
         // if so, get the first error
         ErrorDescription = CurrentRecord.getErrors().get(0).getMessage();
 
@@ -152,29 +112,25 @@ public class SuspensePreparation
         tmpSearchParameters[0] = ErrorDescription;
 
         RegexGroup = "Default";
-        RegexResult = getRegexMatch(RegexGroup,tmpSearchParameters);
+        RegexResult = getRegexMatch(RegexGroup, tmpSearchParameters);
 
-        if (isValidRegexMatchResult(RegexResult))
-        {
+        if (isValidRegexMatchResult(RegexResult)) {
           outputList = RegexResult.split(",");
 
           // add all outputs
-          for (int idx = 0 ; idx < outputList.length ; idx++)
-          {
+          for (int idx = 0; idx < outputList.length; idx++) {
             CurrentRecord.addOutput(outputList[idx]);
           }
-        }
-        else
-        {
+        } else {
           // Default behaviour
           // Suspend all records where we don't have a defined output
           CurrentRecord.addOutput(SUSPENSE_OUTPUT);
-          tmpError = new RecordError("ERR_SUSPENSE_LOOKUP", ErrorType.SPECIAL,getSymbolicName());
+          tmpError = new RecordError("ERR_SUSPENSE_LOOKUP", ErrorType.SPECIAL, getSymbolicName());
           CurrentRecord.addError(tmpError);
         }
       }
     }
-    
+
     return r;
-  }  
+  }
 }

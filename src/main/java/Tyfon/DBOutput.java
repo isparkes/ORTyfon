@@ -45,16 +45,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: DBOutput.java,v $
- * Revision 1.3  2012-10-17 18:14:23  ian
- * Update for release
- *
- * Revision 1.2  2012-07-17 22:32:49  ian
- * WIP
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.adapter.jdbc.JDBCOutputAdapter;
@@ -64,77 +54,53 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
+ * We transform the records here so that they are ready to output making any
+ * specific changes to the record that are necessary to make it ready for
+ * output.
+ *
+ * As we are using the JDBCOutput adapter, we should transform the records into
+ * DBRecords, storing the data to be written using the SetData() method. This
+ * means that we do not have to know about the internal workings of the output
+ * adapter.
+ *
+ * Note that this is just undoing the transformation that we did in the input
+ * adapter.
  *
  * @author IanAdmin
  */
-public class DBOutput extends JDBCOutputAdapter 
-{
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: DBOutput.java,v $, $Revision: 1.3 $, $Date: 2012-10-17 18:14:23 $";
-    
-  /** Creates a new instance of DBOutput */
-  public DBOutput() 
-  {
-    super();
+public class DBOutput extends JDBCOutputAdapter {
+
+  @Override
+  public Collection<IRecord> procValidRecord(IRecord r) {
+    DBRecord tmpDataRecord;
+    TyfonRecord tmpInRecord;
+    //log.debug("Collection");
+
+    Collection<IRecord> Outbatch;
+    Outbatch = new ArrayList<>();
+    tmpInRecord = (TyfonRecord) r;
+    tmpDataRecord = new DBRecord();
+    tmpDataRecord.setOutputColumnCount(12);
+    tmpDataRecord.setOutputColumnInt(0, tmpInRecord.CustIDA);
+    tmpDataRecord.setOutputColumnString(1, tmpInRecord.A_Number);
+    tmpDataRecord.setOutputColumnString(2, tmpInRecord.B_Number);
+    tmpDataRecord.setOutputColumnString(3, tmpInRecord.Call_Date);
+    tmpDataRecord.setOutputColumnInt(4, tmpInRecord.Call_Time);
+    //tmpDataRecord.setOutputColumnDouble(5,tmpInRecord.RatedAmount);      
+    tmpDataRecord.setOutputColumnString(6, tmpInRecord.Zone_Cat);
+    tmpDataRecord.setOutputColumnString(7, tmpInRecord.Dest_Phone_Type);
+      //tmpDataRecord.setOutputColumnDouble(8,tmpInRecord.TyfonRatedAmount);    
+    //tmpDataRecord.setOutputColumnDouble(9,tmpInRecord.TyfonOpenRatedAmount);    
+    tmpDataRecord.setOutputColumnString(10, "Price Group");
+    tmpDataRecord.setOutputColumnString(11, "RetailPriceGroup");
+
+    Outbatch.add((IRecord) tmpDataRecord);
+
+    return Outbatch;
   }
 
-  /**
-   * We transform the records here so that they are ready to output making any 
-   * specific changes to the record that are necessary to make it ready for 
-   * output.
-   * 
-   * As we are using the JDBCOutput adapter, we should transform the records
-   * into DBRecords, storing the data to be written using the SetData() method.
-   * This means that we do not have to know about the internal workings of the
-   * output adapter.
-   *
-   * Note that this is just undoing the transformation that we did in the input
-   * adapter.
-   * @return 
-   */
-    @Override
-    public Collection<IRecord> procValidRecord(IRecord r) 
-    {
-      DBRecord tmpDataRecord;
-      TyfonRecord tmpInRecord;
-      //log.debug("Collection");
-
-      Collection<IRecord> Outbatch;
-      Outbatch = new ArrayList<>();
-      tmpInRecord = (TyfonRecord)r;
-      tmpDataRecord = new DBRecord();
-      tmpDataRecord.setOutputColumnCount(12);
-      tmpDataRecord.setOutputColumnInt   (0,tmpInRecord.CustIDA);
-      tmpDataRecord.setOutputColumnString(1,tmpInRecord.A_Number);
-      tmpDataRecord.setOutputColumnString(2,tmpInRecord.B_Number);
-      tmpDataRecord.setOutputColumnString(3,tmpInRecord.Call_Date);
-      tmpDataRecord.setOutputColumnInt   (4,tmpInRecord.Call_Time);
-      //tmpDataRecord.setOutputColumnDouble(5,tmpInRecord.RatedAmount);      
-      tmpDataRecord.setOutputColumnString(6,tmpInRecord.Zone_Cat);      
-      tmpDataRecord.setOutputColumnString(7,tmpInRecord.Dest_Phone_Type);    
-      //tmpDataRecord.setOutputColumnDouble(8,tmpInRecord.TyfonRatedAmount);    
-      //tmpDataRecord.setOutputColumnDouble(9,tmpInRecord.TyfonOpenRatedAmount);    
-      tmpDataRecord.setOutputColumnString(10,"Price Group");    
-      tmpDataRecord.setOutputColumnString(11,"RetailPriceGroup");
-            
-      Outbatch.add((IRecord)tmpDataRecord);
-    
-      return Outbatch;
-   }
-
-  /**
-   * Handle any error records here so that they are ready to output making any 
-   * specific changes to the record that are necessary to make it ready for 
-   * output.
-   * @return 
-   */
-    @Override
-    public Collection<IRecord> procErrorRecord(IRecord r) 
-    {
-      return null;
-    }
+  @Override
+  public Collection<IRecord> procErrorRecord(IRecord r) {
+    return null;
+  }
 }

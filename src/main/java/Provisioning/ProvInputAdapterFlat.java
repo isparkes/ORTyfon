@@ -48,23 +48,6 @@
  * Half International.
  * ====================================================================
  */
-/* 
- * ========================== VERSION HISTORY =========================
- * $Log: ProvInputAdapterFlat.java,v $
- * Revision 1.4  2014-03-14 15:38:07  ian
- * Update loading to respect end dates
- *
- * Revision 1.3  2014/03/12 20:44:56  ian
- * Update loading to respect end dates
- *
- * Revision 1.2  2012/10/28 09:41:13  ian
- * Update to have subscriptionID
- *
- * Revision 1.1  2012-10-17 18:14:28  ian
- * Update for release
- *
- * ====================================================================
- */
 package Provisioning;
 
 import OpenRate.adapter.file.FlatFileInputAdapter;
@@ -79,19 +62,13 @@ import java.util.Arrays;
 /**
  * OSS (Operational Support System) input adapter
  */
-public class ProvInputAdapterFlat extends FlatFileInputAdapter
-{
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: ProvInputAdapterFlat.java,v $, $Revision: 1.4 $, $Date: 2014-03-14 15:38:07 $";
-	
+public class ProvInputAdapterFlat extends FlatFileInputAdapter {
+
   // This is the stream record number counter which tells us the number of
   // the compressed records
+
   private int StreamRecordNumber;
-  
+
   // This is the object that is used to compress the records
   String custId = null;
   String serviceId = null;
@@ -106,129 +83,82 @@ public class ProvInputAdapterFlat extends FlatFileInputAdapter
 
   // get the conversion object
   private ConversionUtils conv;
-  
+
   /**
-   * The record identifier is used as the separator between records. It is
-   * not possible/efficient to perform parsing on very long xml streams, we
+   * The record identifier is used as the separator between records. It is not
+   * possible/efficient to perform parsing on very long xml streams, we
    * therefore use traditional flat file based techniques to separate the
    * records out of the stream, before passing each individual record for
    * parsing.
    */
   protected String TYFON_RECORD_IDENTIFIER = "customer";
-  
+
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------
-
- /**
-  * Initialise the module. Called during pipeline creation.
-  * Initialise input adapter.
-  * sets the filename to use & initialises the file reader.
-  *
-  * @param PipelineName The name of the pipeline this module is in
-  * @param ModuleName The module symbolic name of this module
-  * @throws OpenRate.exception.InitializationException
-  */
   @Override
   public void init(String PipelineName, String ModuleName)
-            throws InitializationException
-  {
+          throws InitializationException {
     // perform te core preparation first
-    super.init(PipelineName,ModuleName);
-    
+    super.init(PipelineName, ModuleName);
+
     // Prepare the date conversion object
     conv = ConversionUtils.getConversionCache().getConversionObject(getSymbolicName());
     conv.setInputDateFormat("yyyy-MM-dd hh:mm:ss");
   }
-  
- /**
-  * This is called when the synthetic Header record is encountered, and has the
-  * meaning that the stream is starting. In this example we have nothing to do
-  * 
-  * @param r The record to work on
-  * @return Modified record
-  */
+
   @Override
-  public IRecord procHeader(IRecord r)
-  {
+  public IRecord procHeader(IRecord r) {
     // reset the record numbering
     StreamRecordNumber = 0;
 
     return r;
   }
 
- /**
-  * This is called when a data record is encountered. You should do any normal
-  * processing here. For the input adapter, we probably want to change the 
-  * record type from FlatRecord to the record(s) type that we will be using in
-  * the processing pipeline.
-  *
-  * This is also the location for accumulating records into logical groups
-  * (that is records with sub records) and placing them in the pipeline as
-  * they are completed. If you receive a sub record, simply return a null record
-  * in this method to indicate that you are handling it, and that it will be
-  * purged at a later date.
-  * 
-  * @param r
-  * @return Modified Record
-  */
   @Override
-  public IRecord procValidRecord(IRecord r)
-  {
+  public IRecord procValidRecord(IRecord r) {
     ProvRecord outputRecord = null;
-    FlatRecord inputRecord = (FlatRecord)r;
+    FlatRecord inputRecord = (FlatRecord) r;
 
     String tmpData = inputRecord.getData().trim();
-    
+
     // if we have got the customer, then store this
-    if (tmpData.startsWith("<customer "))
-    {
+    if (tmpData.startsWith("<customer ")) {
       // We got the customer tag - get the data
       custId = tmpData.replaceAll("<customer customerId=", "").replaceAll(">", "").replaceAll("\"", "");
-    }
-    // Added as new service id
-    else if (tmpData.startsWith("<account "))
-    {
+    } // Added as new service id
+    else if (tmpData.startsWith("<account ")) {
       serviceId = tmpData.replaceAll("<account serviceId=", "").replaceAll(">", "").replaceAll("\"", "").trim();
       inSegment = true;
-    }
-    else if (tmpData.startsWith("<number>"))
-    {
+    } else if (tmpData.startsWith("<number>")) {
       number = tmpData.replaceAll("<number>", "").replaceAll("</number>", "").trim();
-    }
-    // Appears to be deprecated
-    else if (tmpData.startsWith("<pricePlan>"))
-    {
+    } // Appears to be deprecated
+    else if (tmpData.startsWith("<pricePlan>")) {
       inSegment = false;
       inTariff = true;
-    }
-    // New version of "priceplan"
-    else if (tmpData.startsWith("<code>"))
-    {
+    } // New version of "priceplan"
+    else if (tmpData.startsWith("<code>")) {
       pricePlan = tmpData.replaceAll("<code>", "").replaceAll("</code>", "");
-    }
-    else if (tmpData.startsWith("<validFrom>"))
-    {
-      if (inTariff)
+    } else if (tmpData.startsWith("<validFrom>")) {
+      if (inTariff) {
         validFrom = tmpData.replaceAll("<validFrom>", "").replaceAll("</validFrom>", "");
-      if (inSegment)
+      }
+      if (inSegment) {
         validFromSegment = tmpData.replaceAll("<validFrom>", "").replaceAll("</validFrom>", "");
-    }
-    else if (tmpData.startsWith("<validTo>"))
-    {
-      if (inTariff)
+      }
+    } else if (tmpData.startsWith("<validTo>")) {
+      if (inTariff) {
         validTo = tmpData.replaceAll("<validTo>", "").replaceAll("</validTo>", "");
-      if (inSegment)
+      }
+      if (inSegment) {
         validToSegment = tmpData.replaceAll("<validTo>", "").replaceAll("</validTo>", "");
-    }
-    
-    // output the record if we have one to output, keep the customer data
-    else if (tmpData.startsWith("</pricePlan>"))
-    {
+      }
+    } // output the record if we have one to output, keep the customer data
+    else if (tmpData.startsWith("</pricePlan>")) {
       inTariff = false;
-      
+
       // Create the record and pump it out
-      outputRecord = new ProvRecord ();
+      outputRecord = new ProvRecord();
       outputRecord.setCustId(custId);
       outputRecord.setServiceId(serviceId);
       outputRecord.setNumber(number);
@@ -237,119 +167,95 @@ public class ProvInputAdapterFlat extends FlatFileInputAdapter
       outputRecord.setValidTo(validTo);
       outputRecord.setSegmentValidFrom(validFromSegment);
       outputRecord.setSegmentValidTo(validToSegment);
-      
+
       // deal with empty dates
-      if (validFrom.isEmpty())
-      {
+      if (validFrom.isEmpty()) {
         validFrom = "1970-01-01";
       }
-      
+
       // deal with empty dates
-      if (validTo.isEmpty())
-      {
+      if (validTo.isEmpty()) {
         validTo = "2036-12-31";
       }
-      
+
       // deal with empty dates
-      if (validFromSegment.isEmpty())
-      {
+      if (validFromSegment.isEmpty()) {
         validFromSegment = "1970-01-01";
       }
-      
+
       // deal with empty dates
-      if (validToSegment.isEmpty())
-      {
+      if (validToSegment.isEmpty()) {
         validToSegment = "2036-12-31";
       }
-      
-      try
-      {
+
+      try {
         outputRecord.setValidFromUTC(conv.convertInputDateToUTC(validFrom + " 00:00:00"));
-      }
-      catch (ParseException ex)
-      {
+      } catch (ParseException ex) {
         // we could not parse the subscriptionID to be an integer
         RecordError tmpError = new RecordError("ERR_PARSE_VALID_FROM", ErrorType.SPECIAL);
         outputRecord.addError(tmpError);
       }
 
-      try
-      {
+      try {
         outputRecord.setSegmentValidFromUTC(conv.convertInputDateToUTC(validFromSegment + " 00:00:00"));
-      }
-      catch (ParseException ex)
-      {
+      } catch (ParseException ex) {
         // we could not parse the subscriptionID to be an integer
         RecordError tmpError = new RecordError("ERR_PARSE_VALID_FROM", ErrorType.SPECIAL);
         outputRecord.addError(tmpError);
       }
-      
-      try
-      {
+
+      try {
         outputRecord.setValidToUTC(conv.convertInputDateToUTC(validTo + " 23:59:59"));
-      }
-      catch (ParseException ex)
-      {
+      } catch (ParseException ex) {
         // we could not parse the subscriptionID to be an integer
         RecordError tmpError = new RecordError("ERR_PARSE_VALID_TO", ErrorType.SPECIAL);
         outputRecord.addError(tmpError);
       }
-      
-      try
-      {
+
+      try {
         outputRecord.setSegmentValidToUTC(conv.convertInputDateToUTC(validToSegment + " 23:59:59"));
-      }
-      catch (ParseException ex)
-      {
+      } catch (ParseException ex) {
         // we could not parse the subscriptionID to be an integer
         RecordError tmpError = new RecordError("ERR_PARSE_VALID_TO", ErrorType.SPECIAL);
         outputRecord.addError(tmpError);
       }
-      
+
       // Adjust the out of range dates
-      if (outputRecord.getValidFromUTC() < 0)
-      {
+      if (outputRecord.getValidFromUTC() < 0) {
         outputRecord.setValidFromUTC(0);
       }
-      
+
       // Adjust the out of range dates
-      if (outputRecord.getSegmentValidFromUTC() < 0)
-      {
+      if (outputRecord.getSegmentValidFromUTC() < 0) {
         outputRecord.setSegmentValidFromUTC(0);
       }
-      
+
       // Check the length of the number
-      if (number.isEmpty())
-      {
+      if (number.isEmpty()) {
         // we could not parse the subscriptionID to be an integer
         RecordError tmpError = new RecordError("ERR_NUMBER_EMPTY", ErrorType.SPECIAL);
         outputRecord.addError(tmpError);
       }
-      
+
       // Check the length of the number
-      if (number.length() >= 24)
-      {
+      if (number.length() >= 24) {
         // we could not parse the subscriptionID to be an integer
         RecordError tmpError = new RecordError("ERR_NUMBER_TOO_LONG", ErrorType.SPECIAL);
         outputRecord.addError(tmpError);
       }
-      
+
       // reset the price plan data
       pricePlan = null;
       validFrom = null;
       validTo = null;
-    }
-    // reset the service and number data
-    else if (tmpData.startsWith("</account>"))
-    {
+    } // reset the service and number data
+    else if (tmpData.startsWith("</account>")) {
       number = null;
-    }
-    // reset the service and number data
-    else if (tmpData.startsWith("</customer>"))
-    {
+    } // reset the service and number data
+    else if (tmpData.startsWith("</customer>")) {
       serviceId = null;
       custId = null;
-      
+
       // for safety
       inSegment = false;
       inTariff = false;
@@ -358,58 +264,56 @@ public class ProvInputAdapterFlat extends FlatFileInputAdapter
     return outputRecord;
   }
 
- /**
-  * This is called when a data record with errors is encountered. You should do
-  * any processing here that you have to do for error records, e.g. statistics,
-  * special handling, even error correction!
-  * 
-  * The input adapter is not expected to provide any records here.
-  * 
-  * @param r The record to work on
-  * @return Modified record
-  */
+  /**
+   * This is called when a data record with errors is encountered. You should do
+   * any processing here that you have to do for error records, e.g. statistics,
+   * special handling, even error correction!
+   *
+   * The input adapter is not expected to provide any records here.
+   *
+   * @param r The record to work on
+   * @return Modified record
+   */
   @Override
-  public IRecord procErrorRecord(IRecord r)
-  {
+  public IRecord procErrorRecord(IRecord r) {
 
     // The FlatFileInputAdapter is not able to create error records, so we
     // do not have to do anything for this
     return r;
   }
 
- /**
-  * This is called when the synthetic trailer record is encountered, and has the
-  * meaning that the stream is now finished. In this example, all we do is 
-  * pass the control back to the transactional layer.
-  *
-  * In models where record aggregation (records and sub records) is used, you
-  * might want to check for any purged records here.
-  * 
-  * @param r The record to work on
-  * @return Modified record
-  */
+  /**
+   * This is called when the synthetic trailer record is encountered, and has
+   * the meaning that the stream is now finished. In this example, all we do is
+   * pass the control back to the transactional layer.
+   *
+   * In models where record aggregation (records and sub records) is used, you
+   * might want to check for any purged records here.
+   *
+   * @param r The record to work on
+   * @return Modified record
+   */
   @Override
-  public IRecord procTrailer(IRecord r)
-  {
+  public IRecord procTrailer(IRecord r) {
     TrailerRecord tmpTrailer;
-    
+
     // set the trailer record count
-    tmpTrailer = (TrailerRecord)r;
-    
+    tmpTrailer = (TrailerRecord) r;
+
     tmpTrailer.setRecordCount(StreamRecordNumber);
-    return (IRecord)tmpTrailer;
+    return (IRecord) tmpTrailer;
   }
-  
- /**
-  * Order the list of files. This is can be overridden so that the sure may define their own rules.
-  * 
-  * @param dir The directory to scan
-  * @param filter The filter we are using
-  * @return A list of files to process, first in list gets processed first
-  */
+
+  /**
+   * Order the list of files. This is can be overridden so that the sure may
+   * define their own rules.
+   *
+   * @param dir The directory to scan
+   * @param filter The filter we are using
+   * @return A list of files to process, first in list gets processed first
+   */
   @Override
-   public String[] getOrderedFileListForProcessing(File dir, FilenameFilter filter)
-  {
+  public String[] getOrderedFileListForProcessing(File dir, FilenameFilter filter) {
     String[] orgFileNames = super.getOrderedFileListForProcessing(dir, filter);
     Arrays.sort(orgFileNames);
     return orgFileNames;

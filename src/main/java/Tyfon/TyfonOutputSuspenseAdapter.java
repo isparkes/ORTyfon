@@ -45,13 +45,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: TyfonOutputSuspenseAdapter.java,v $
- * Revision 1.1  2012-10-17 18:14:22  ian
- * Update for release
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.adapter.file.FlatFileOutputAdapter;
@@ -61,95 +54,54 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * The Output Adapter is reponsible for writing the completed records to the
- * target file. 
+ * The Output Adapter is responsible for writing the completed records to the
+ * target file.
  */
-public class TyfonOutputSuspenseAdapter extends FlatFileOutputAdapter
-{
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: TyfonOutputSuspenseAdapter.java,v $, $Revision: 1.1 $, $Date: 2012-10-17 18:14:22 $";
+public class TyfonOutputSuspenseAdapter extends FlatFileOutputAdapter {
 
-  /**
-  * Constructor for CustomizeOutputAdapter.
-  */
-  public TyfonOutputSuspenseAdapter()
-  {
-    super();
-  }
-
-  /**
-   * We transform the records here so that they are ready to output making any 
-   * specific changes to the record that are necessary to make it ready for 
-   * output.
-   * 
-   * As we are using the FlatFileOutput adapter, we should transform the records
-   * into FlatRecords, storing the data to be written using the SetData() method.
-   * This means that we do not have to know about the internal workings of the
-   * output adapter.
-   *
-   * Note that this is just undoing the transformation that we did in the input
-   * adapter.
-   */
   @Override
-  public Collection<IRecord> procValidRecord(IRecord r) 
-  {
+  public Collection<IRecord> procValidRecord(IRecord r) {
     FlatRecord tmpOutRecord;
     TyfonRecord CurrentRecord;
 
     Collection<IRecord> Outbatch;
-    Outbatch = new ArrayList<IRecord>();
+    Outbatch = new ArrayList<>();
 
-    CurrentRecord = (TyfonRecord)r;
-    
+    CurrentRecord = (TyfonRecord) r;
+
     // We only transform the detail records, and leave the others alone
-    if (CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-    {
+    if (CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) {
       tmpOutRecord = new FlatRecord();
       tmpOutRecord.setData(CurrentRecord.unmapVenteloSuspenseData());
-      Outbatch.add((IRecord)tmpOutRecord);
-    }
-    else if (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
-    {
+      Outbatch.add((IRecord) tmpOutRecord);
+    } else if (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD) {
       tmpOutRecord = new FlatRecord();
       tmpOutRecord.setData(CurrentRecord.unmapTelavoxSuspenseData());
-      Outbatch.add((IRecord)tmpOutRecord);
+      Outbatch.add((IRecord) tmpOutRecord);
     }
-    
+
     return Outbatch;
   }
 
-  /**
-   * Handle any error records here so that they are ready to output making any 
-   * specific changes to the record that are necessary to make it ready for 
-   * output.
-   */
   @Override
-  public Collection<IRecord> procErrorRecord(IRecord r) 
-  {
+  public Collection<IRecord> procErrorRecord(IRecord r) {
     FlatRecord tmpOutRecord;
     TyfonRecord CurrentRecord;
 
     Collection<IRecord> Outbatch;
-    Outbatch = new ArrayList<IRecord>();
+    Outbatch = new ArrayList<>();
 
-    CurrentRecord = (TyfonRecord)r;
+    CurrentRecord = (TyfonRecord) r;
 
     // We only transform the detail records, and leave the others alone
-    if (CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-    {
+    if (CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) {
       tmpOutRecord = new FlatRecord();
       tmpOutRecord.setData(CurrentRecord.unmapVenteloSuspenseData());
-      Outbatch.add((IRecord)tmpOutRecord);
-    }
-    else if (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
-    {
+      Outbatch.add((IRecord) tmpOutRecord);
+    } else if (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD) {
       tmpOutRecord = new FlatRecord();
       tmpOutRecord.setData(CurrentRecord.unmapTelavoxSuspenseData());
-      Outbatch.add((IRecord)tmpOutRecord);
+      Outbatch.add((IRecord) tmpOutRecord);
     }
 
     return Outbatch;

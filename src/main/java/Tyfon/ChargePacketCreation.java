@@ -48,13 +48,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: ChargePacketCreation.java,v $
- * Revision 1.1  2012-10-17 18:14:22  ian
- * Update for release
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.process.AbstractRUMTimeMatch;
@@ -64,106 +57,84 @@ import OpenRate.record.IRecord;
 
 /**
  * This module creates the "seed" charge packet, which is used to drive the rest
- * of the rating process. This sets:
- *  - The time splitting flag, so that we check time splitting for all calls
- *  - The default Time Model (all plans use the same time model)
- *  - The default Zone Model (all plans use the same zone model)
- *  - The Zone Result we looked up previously - the assumption here is therefore
- *    that we have a standard zoning model for all plans
- *  - The packet type as being a "R" = "Retail" packet for base products
- *  - The packet type as being a "O" = "Overlay" packet for overlay products
- *  - The priority 0 for base products, > 0 for overlay products - we use this
- *    to control the error handling and rating
- *  - The default "TEL" (telephony) service
+ * of the rating process. This sets: - The time splitting flag, so that we check
+ * time splitting for all calls - The default Time Model (all plans use the same
+ * time model) - The default Zone Model (all plans use the same zone model) -
+ * The Zone Result we looked up previously - the assumption here is therefore
+ * that we have a standard zoning model for all plans - The packet type as being
+ * a "R" = "Retail" packet for base products - The packet type as being a "O" =
+ * "Overlay" packet for overlay products - The priority 0 for base products, > 0
+ * for overlay products - we use this to control the error handling and rating -
+ * The default "TEL" (telephony) service
  *
  * @author Ian
  */
-public class ChargePacketCreation extends AbstractStubPlugIn
-{
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: ChargePacketCreation.java,v $, $Revision: 1.1 $, $Date: 2012-10-17 18:14:22 $";
-
+public class ChargePacketCreation extends AbstractStubPlugIn {
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------
 
- /**
-  * This is called when a data record is encountered. You should do any normal
-  * processing here.
-   * @return 
-  */
   @Override
-  public IRecord procValidRecord(IRecord r)
-  {
+  public IRecord procValidRecord(IRecord r) {
     ChargePacket tmpCP;
-	  TyfonRecord CurrentRecord = (TyfonRecord)r;
+    TyfonRecord CurrentRecord = (TyfonRecord) r;
 
-    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD))
-    {
-      if (CurrentRecord.isMarkup)
-      {
+    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
+      if (CurrentRecord.isMarkup) {
         // Just create a single CP for markup
         // ****************** Add the retail packet ********************
         //	initialise the Zone Model and time model with the value 'Default'.
         tmpCP = new ChargePacket();
-        tmpCP.packetType     = "R";                       // Retail packet typ
-        tmpCP.zoneModel      = "Default";                 // Default
-        tmpCP.zoneResult     = CurrentRecord.Destination; // The zone destination we found
-        tmpCP.timeModel      = "Default";                 // Default
-        tmpCP.service        = CurrentRecord.Service;     // Default service
-        tmpCP.ratePlanName   = "Markup";                  // The markup virtual product 
-        tmpCP.subscriptionID = "TEL";                     // We don't need a subscription
-        tmpCP.priority       = 0;                         // Base product - prio 0
-        tmpCP.priceGroup     = CurrentRecord.markupType;  // The markup type is the prce group
+        tmpCP.packetType = "R";                       // Retail packet typ
+        tmpCP.zoneModel = "Default";                  // Default
+        tmpCP.zoneResult = CurrentRecord.Destination; // The zone destination we found
+        tmpCP.timeModel = "Default";                  // Default
+        tmpCP.service = CurrentRecord.Service;        // Default service
+        tmpCP.ratePlanName = "Markup";                // The markup virtual product 
+        tmpCP.subscriptionID = "TEL";                 // We don't need a subscription
+        tmpCP.priority = 0;                           // Base product - prio 0
 
         // Mark the record so that we do not perform splitting on it
         tmpCP.timeSplitting = AbstractRUMTimeMatch.TIME_SPLITTING_NO_CHECK;
         CurrentRecord.addChargePacket(tmpCP);
-      }
-      else
-      {
+      } else {
         // Perform the normal rating
         // ****************** Add the retail packet ********************
         //	initialise the Zone Model and time model with the value 'Default'.
         tmpCP = new ChargePacket();
-        tmpCP.packetType     = "R";                       // Retail packet typ
-        tmpCP.zoneModel      = "Default";                 // Default
-        tmpCP.zoneResult     = CurrentRecord.Destination; // The zone destination we found
-        tmpCP.timeModel      = "Default";                 // Default
-        tmpCP.service        = CurrentRecord.Service;     // Default service
-        tmpCP.ratePlanName   = CurrentRecord.baseProduct; // The base product 
-        tmpCP.subscriptionID = "TEL";                     // We don't need a subscription
-        tmpCP.priority       = 0;                         // Base product - prio 0
+        tmpCP.packetType = "R";                       // Retail packet typ
+        tmpCP.zoneModel = "Default";                  // Default
+        tmpCP.zoneResult = CurrentRecord.Destination; // The zone destination we found
+        tmpCP.timeModel = "Default";                  // Default
+        tmpCP.service = CurrentRecord.Service;        // Default service
+        tmpCP.ratePlanName = CurrentRecord.baseProduct; // The base product 
+        tmpCP.subscriptionID = "TEL";                 // We don't need a subscription
+        tmpCP.priority = 0;                           // Base product - prio 0
 
         // Mark the record so that we do not perform splitting on it
         tmpCP.timeSplitting = AbstractRUMTimeMatch.TIME_SPLITTING_NO_CHECK;
         CurrentRecord.addChargePacket(tmpCP);
 
         // ****************** Add the override packets ********************
-        for (int i = 0 ; i < CurrentRecord.overlay.size() ; i++)
-        {
+        for (int i = 0; i < CurrentRecord.overlay.size(); i++) {
           String tmpOverlay = CurrentRecord.overlay.get(i);
           tmpCP = new ChargePacket();
-          tmpCP.packetType     = "O";                       // Override packet typ
-          tmpCP.zoneModel      = "Default";                 // Default
-          tmpCP.zoneResult     = CurrentRecord.Destination; // The zone destination we found
-          tmpCP.timeModel      = "Default";                 // Default
-          tmpCP.service        = CurrentRecord.Service;     // Default service
-          tmpCP.ratePlanName   = tmpOverlay;                // Overlay product 
-          tmpCP.subscriptionID = "TEL";                     // We don't need a subscription
-          tmpCP.priority       = i + 1;                     // Overlay product - prio > 0
+          tmpCP.packetType = "O";                     // Override packet typ
+          tmpCP.zoneModel = "Default";                // Default
+          tmpCP.zoneResult = CurrentRecord.Destination; // The zone destination we found
+          tmpCP.timeModel = "Default";                // Default
+          tmpCP.service = CurrentRecord.Service;      // Default service
+          tmpCP.ratePlanName = tmpOverlay;            // Overlay product 
+          tmpCP.subscriptionID = "TEL";               // We don't need a subscription
+          tmpCP.priority = i + 1;                     // Overlay product - prio > 0
 
           // Mark the record so that we do not perform splitting on it
           tmpCP.timeSplitting = AbstractRUMTimeMatch.TIME_SPLITTING_NO_CHECK;
           CurrentRecord.addChargePacket(tmpCP);
         }
       }
-      
+
       // ****************** Add the wholesale packet ********************
       //	initialise the Zone Model and time model with the value 'Default'.
       //tmpCP = new ChargePacket();
@@ -171,7 +142,6 @@ public class ChargePacketCreation extends AbstractStubPlugIn
       //tmpCP.timeModel    = "Default";
       //tmpCP.packetType   = "W";
       //tmpCP.service      = "TEL";
-
       // Mark the record so that we do not perform splitting on it
       //tmpCP.timeSplitting = AbstractRUMTimeMatch.TIME_SPLITTING_NO_CHECK;
       // Temporary: Wholesale rating not supported yet
@@ -180,16 +150,9 @@ public class ChargePacketCreation extends AbstractStubPlugIn
 
     return r;
   }
-  
- /**
-  * This is called when a data record with errors is encountered. You should do
-  * any processing here that you have to do for error records, e.g. statistics,
-  * special handling, even error correction!
-   * @return 
-  */
+
   @Override
-  public IRecord procErrorRecord(IRecord r)
-  { 
+  public IRecord procErrorRecord(IRecord r) {
     return r;
   }
 }

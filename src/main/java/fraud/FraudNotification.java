@@ -48,16 +48,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: FraudNotification.java,v $
- * Revision 1.2  2014-06-17 17:29:44  ian
- * Add logging
- *
- * Revision 1.1  2014-05-24 11:21:24  ian
- * First version fraud
- *
- * ====================================================================
- */
 package fraud;
 
 import OpenRate.process.AbstractEmailNotification;
@@ -69,32 +59,19 @@ import Tyfon.TyfonRecord;
  *
  * @author ian
  */
-public class FraudNotification extends AbstractEmailNotification
-{
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: FraudNotification.java,v $, $Revision: 1.2 $, $Date: 2014-06-17 17:29:44 $";
+public class FraudNotification extends AbstractEmailNotification {
 
   @Override
-  public IRecord procValidRecord(IRecord r)
-  {
+  public IRecord procValidRecord(IRecord r) {
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
-    if (CurrentRecord.RECORD_TYPE == TyfonRecord.FRAUD_DETAIL_RECORD)
-    {
+    if (CurrentRecord.RECORD_TYPE == TyfonRecord.FRAUD_DETAIL_RECORD) {
       // do nothing for invalid, errored, not chargeable records
-      for (FraudAlert alert : CurrentRecord.alerts)
-      {
-        try
-        {
+      for (FraudAlert alert : CurrentRecord.alerts) {
+        try {
           getPipeLog().warning("FRAUD_WARNING: Possible Fraud, customer <" + CurrentRecord.CustIDA + ">, number <" + CurrentRecord.A_Number + "> balance id <" + alert.getThresholdName() + "> balance <" + alert.getBalance() + ">, limit <" + alert.getNotificationLimit() + ">");
           despatchMailInternal("Possible Fraud, customer <" + CurrentRecord.CustIDA + ">, number <" + CurrentRecord.A_Number + ">", "Possible Fraud, customer <" + CurrentRecord.CustIDA + ">, number <" + CurrentRecord.A_Number + "> balance id <" + alert.getThresholdName() + "> balance <" + alert.getBalance() + ">, limit <" + alert.getNotificationLimit() + ">");
-        }
-        catch (NullPointerException ex)
-        {
+        } catch (NullPointerException ex) {
           getPipeLog().error("Infomation not found for Fraud email: Possible Fraud, customer <" + CurrentRecord.CustIDA + ">, number <" + CurrentRecord.A_Number + ">, balance id <" + alert.getThresholdName() + "> balance <" + alert.getBalance() + ">, limit <" + alert.getNotificationLimit() + ">");
         }
       }
@@ -104,8 +81,7 @@ public class FraudNotification extends AbstractEmailNotification
   }
 
   @Override
-  public IRecord procErrorRecord(IRecord r)
-  {
+  public IRecord procErrorRecord(IRecord r) {
     // do nothing
     return r;
   }

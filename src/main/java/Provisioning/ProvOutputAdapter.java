@@ -47,19 +47,6 @@
  * This software contains portions by The Apache Software Foundation, Robert
  * Half International.
  * ====================================================================
- */ 
-/* ========================== VERSION HISTORY =========================
- * $Log: ProvOutputAdapter.java,v $
- * Revision 1.3  2014-03-14 15:37:24  ian
- * Update loading to respect end dates
- *
- * Revision 1.2  2012/10/28 09:41:12  ian
- * Update to have subscriptionID
- *
- * Revision 1.1  2012-10-17 18:14:28  ian
- * Update for release
- *
- * ========================== VERSION HISTORY =========================
  */
 package Provisioning;
 
@@ -71,29 +58,16 @@ import java.util.Collection;
 
 /**
  * Prepares the provisioning records for output to the customer table.
- * 
+ *
  * @author IanAdmin
  */
-public class ProvOutputAdapter extends JDBCOutputAdapter 
-{
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: ProvOutputAdapter.java,v $, $Revision: 1.3 $, $Date: 2014-03-14 15:37:24 $";
-
-/** Creates a new instance of DBOutput */
-  public ProvOutputAdapter() 
-  {
-    super();
-  }
+public class ProvOutputAdapter extends JDBCOutputAdapter {
 
   /**
-   * We transform the records here so that they are ready to output making any 
-   * specific changes to the record that are necessary to make it ready for 
+   * We transform the records here so that they are ready to output making any
+   * specific changes to the record that are necessary to make it ready for
    * output.
-   * 
+   *
    * As we are using the JDBCOutput adapter, we should transform the records
    * into DBRecords, storing the data to be written using the SetData() method.
    * This means that we do not have to know about the internal workings of the
@@ -101,43 +75,43 @@ public class ProvOutputAdapter extends JDBCOutputAdapter
    *
    * Note that this is just undoing the transformation that we did in the input
    * adapter.
-   * @return 
+   *
+   * @return
    */
-    @Override
-    public Collection<IRecord> procValidRecord(IRecord r) 
-    {
-      ProvRecord inputRecord = (ProvRecord) r;
-      DBRecord tmpDataRecord;
-      
-      Collection<IRecord> Outbatch;
-      Outbatch = new ArrayList<>();
+  @Override
+  public Collection<IRecord> procValidRecord(IRecord r) {
+    ProvRecord inputRecord = (ProvRecord) r;
+    DBRecord tmpDataRecord;
 
-      // prepare the output record
-      tmpDataRecord = new DBRecord();
-	    tmpDataRecord.setOutputColumnCount(8);
-      tmpDataRecord.setOutputColumnString(0, inputRecord.getCustId());
-      tmpDataRecord.setOutputColumnString(1, inputRecord.getServiceId());
-      tmpDataRecord.setOutputColumnString(2, inputRecord.getNumber());
-      tmpDataRecord.setOutputColumnString(3, inputRecord.getPricePlan());
-      tmpDataRecord.setOutputColumnLong  (4, inputRecord.getValidFromUTC());
-      tmpDataRecord.setOutputColumnLong  (5, inputRecord.getValidToUTC());
-      tmpDataRecord.setOutputColumnLong  (6, inputRecord.getSegmentValidFromUTC());
-      tmpDataRecord.setOutputColumnLong  (7, inputRecord.getSegmentValidToUTC());
-      
-	    Outbatch.add((IRecord)tmpDataRecord);
+    Collection<IRecord> Outbatch;
+    Outbatch = new ArrayList<>();
 
-      return Outbatch;
-   }
+    // prepare the output record
+    tmpDataRecord = new DBRecord();
+    tmpDataRecord.setOutputColumnCount(8);
+    tmpDataRecord.setOutputColumnString(0, inputRecord.getCustId());
+    tmpDataRecord.setOutputColumnString(1, inputRecord.getServiceId());
+    tmpDataRecord.setOutputColumnString(2, inputRecord.getNumber());
+    tmpDataRecord.setOutputColumnString(3, inputRecord.getPricePlan());
+    tmpDataRecord.setOutputColumnLong(4, inputRecord.getValidFromUTC());
+    tmpDataRecord.setOutputColumnLong(5, inputRecord.getValidToUTC());
+    tmpDataRecord.setOutputColumnLong(6, inputRecord.getSegmentValidFromUTC());
+    tmpDataRecord.setOutputColumnLong(7, inputRecord.getSegmentValidToUTC());
+
+    Outbatch.add((IRecord) tmpDataRecord);
+
+    return Outbatch;
+  }
 
   /**
-   * Handle any error records here so that they are ready to output making any 
-   * specific changes to the record that are necessary to make it ready for 
+   * Handle any error records here so that they are ready to output making any
+   * specific changes to the record that are necessary to make it ready for
    * output.
-   * @return 
+   *
+   * @return
    */
-    @Override
-    public Collection<IRecord> procErrorRecord(IRecord r) 
-    {
-      return null;
-    }    
+  @Override
+  public Collection<IRecord> procErrorRecord(IRecord r) {
+    return null;
+  }
 }

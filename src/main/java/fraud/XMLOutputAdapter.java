@@ -45,34 +45,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: XMLOutputAdapter.java,v $
- * Revision 1.4  2014-06-26 14:56:10  ian
- * Correct xml structure
- *
- * Revision 1.3  2014-06-18 11:57:12  ian
- * Add alert description
- *
- * Revision 1.2  2014-06-10 06:19:14  ian
- * Empty file deletion
- *
- * Revision 1.1  2014-05-26 20:40:24  ian
- * Added output adapter
- *
- * Revision 1.5  2012-11-30 21:28:08  ian
- * Update
- *
- * Revision 1.4  2012/10/28 09:41:12  ian
- * Update to have subscriptionID
- *
- * Revision 1.3  2012-10-17 18:14:23  ian
- * Update for release
- *
- * Revision 1.2  2012-07-17 22:32:48  ian
- * WIP
- *
- * ====================================================================
- */
 package fraud;
 
 import OpenRate.adapter.file.FlatFileOutputAdapter;
@@ -92,38 +64,9 @@ import java.util.HashMap;
  */
 public class XMLOutputAdapter extends FlatFileOutputAdapter {
 
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information please <a
-   * target='new'
-   * href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click
-   * here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: XMLOutputAdapter.java,v $, $Revision: 1.4 $, $Date: 2014-06-26 14:56:10 $";
-
-  /**
-   * Constructor for CustomizeOutputAdapter.
-   */
-  public XMLOutputAdapter() {
-    super();
-  }
-
   // Marks if the file has output or not
-  private final HashMap <Integer, Boolean> fileHasContent = new HashMap<>();
-  
-  /**
-   * We transform the records here so that they are ready to output making any
-   * specific changes to the record that are necessary to make it ready for
-   * output.
-   *
-   * As we are using the FlatFileOutput adapter, we should transform the records
-   * into FlatRecords, storing the data to be written using the SetData()
-   * method. This means that we do not have to know about the internal workings
-   * of the output adapter.
-   *
-   * Note that this is just undoing the transformation that we did in the input
-   * adapter.
-   */
+  private final HashMap<Integer, Boolean> fileHasContent = new HashMap<>();
+
   @Override
   public void openValidFile(String filename) {
     super.openValidFile(filename);
@@ -170,10 +113,10 @@ public class XMLOutputAdapter extends FlatFileOutputAdapter {
                 + wrapValue("balance", alert.getBalance())
                 + "\t</alert>");
         Outbatch.add((IRecord) tmpOutRecord);
-        
+
         // Mark that this is not an empty file
-        if (fileHasContent.get(getTransactionNumber()) == true ) {
-          fileHasContent.put(getTransactionNumber(),false);
+        if (fileHasContent.get(getTransactionNumber()) == true) {
+          fileHasContent.put(getTransactionNumber(), false);
         }
       }
     }
@@ -181,12 +124,6 @@ public class XMLOutputAdapter extends FlatFileOutputAdapter {
     return Outbatch;
   }
 
-  /**
-   * Handle any error records here so that they are ready to output making any
-   * specific changes to the record that are necessary output.
-   *
-   * @return to make it ready for
-   */
   @Override
   public Collection<IRecord> procErrorRecord(IRecord r) {
     return null;
@@ -236,45 +173,43 @@ public class XMLOutputAdapter extends FlatFileOutputAdapter {
 
     return result.replaceAll("&", "&amp;");
   }
-  
+
   /**
    * Checks if the valid output file is empty. This method is intended to be
-   * overwritten in the case that you wish to modify the behaviour of the
-   * output file deletion. 
-   * 
-   * The default behaviour is that we check to see if any bytes have been 
-   * written to the output file, but sometimes this is not the right way, for 
+   * overwritten in the case that you wish to modify the behaviour of the output
+   * file deletion.
+   *
+   * The default behaviour is that we check to see if any bytes have been
+   * written to the output file, but sometimes this is not the right way, for
    * example if a file has a header/trailer but no detail records.
-   * 
+   *
    * @param transactionNumber The number of the transaction to check for
    * @return true if the file is empty, otherwise false
    */
   @Override
-  public boolean getOutputFileEmpty(int transactionNumber)
-  {
+  public boolean getOutputFileEmpty(int transactionNumber) {
     boolean fileStatus = fileHasContent.get(transactionNumber);
     fileHasContent.remove(transactionNumber);
     return fileStatus;
   }
-  
- /**
-  * Process the stream header. Set up the file content list based on the 
-  * transaction number held in the header record.
-  *
-  * @param r The record we are working on
-  * @return The processed record
-  * @throws ProcessingException  
-  */
+
+  /**
+   * Process the stream header. Set up the file content list based on the
+   * transaction number held in the header record.
+   *
+   * @param r The record we are working on
+   * @return The processed record
+   * @throws ProcessingException
+   */
   @Override
-  public IRecord procHeader(IRecord r) throws ProcessingException
-  {
+  public IRecord procHeader(IRecord r) throws ProcessingException {
     super.procHeader(r);
-    
-    HeaderRecord tmpHeader = (HeaderRecord)r;
+
+    HeaderRecord tmpHeader = (HeaderRecord) r;
     int tmpTransNumber = tmpHeader.getTransactionNumber();
-    
+
     fileHasContent.put(tmpTransNumber, true);
-    
+
     return r;
   }
 }

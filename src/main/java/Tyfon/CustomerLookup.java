@@ -45,31 +45,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: CustomerLookup.java,v $
- * Revision 1.8  2014-05-24 11:21:25  ian
- * First version fraud
- *
- * Revision 1.7  2014-03-18 20:24:20  ian
- * Added selection of correct tariff from segment
- *
- * Revision 1.6  2014/03/12 20:44:55  ian
- * Update loading to respect end dates
- *
- * Revision 1.5  2012/11/30 21:28:08  ian
- * Update
- *
- * Revision 1.4  2012/10/28 09:41:12  ian
- * Update to have subscriptionID
- *
- * Revision 1.3  2012-10-17 18:14:23  ian
- * Update for release
- *
- * Revision 1.2  2012-07-17 22:32:49  ian
- * WIP
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.exception.ProcessingException;
@@ -88,84 +63,57 @@ import OpenRate.record.RecordError;
  */
 public class CustomerLookup extends AbstractCustomerLookupAudited {
 
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information please <a
-   * target='new'
-   * href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click
-   * here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: CustomerLookup.java,v $, $Revision: 1.8 $, $Date: 2014-05-24 11:21:25 $";
-
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------
-  /**
-   * This is called when a valid detail record is encountered.
-   * @return 
-   * @throws OpenRate.exception.ProcessingException 
-   */
   @Override
   public IRecord procValidRecord(IRecord r) throws ProcessingException {
     TyfonRecord CurrentRecord;
 
     CurrentRecord = (TyfonRecord) r;
 
-    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.FRAUD_DETAIL_RECORD))
-    {
-      try
-      {
+    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.FRAUD_DETAIL_RECORD)) {
+      try {
         // Get the A customer identification
         CurrentRecord.CustIDA = getCustId(CurrentRecord.A_Number, CurrentRecord.UTCEventDate);
 
-        if (CurrentRecord.CustIDA == null)
-        {
+        if (CurrentRecord.CustIDA == null) {
           CurrentRecord.addError(new RecordError("ERR_CUST_NOT_FOUND", ErrorType.DATA_NOT_FOUND));
-        }
-        else
-        {
+        } else {
           // Get the audit segment we need
           AuditSegment tmpAudSeg = this.getAuditSegment(CurrentRecord.CustIDA, CurrentRecord.UTCEventDate);
-          
+
           // Get the proucts from it
           ProductList tmpProductList;
           CustProductInfo tmpCPI;
 
-          tmpProductList = this.getProductList(tmpAudSeg,null);
+          tmpProductList = this.getProductList(tmpAudSeg, null);
 
-          if ((tmpProductList == null) || (tmpProductList.getProductCount() == 0))
-          {
+          if ((tmpProductList == null) || (tmpProductList.getProductCount() == 0)) {
             // did not find any customer information
             CurrentRecord.addError(new RecordError("ERR_TARIFF_NOT_FOUND", ErrorType.DATA_NOT_FOUND));
-          }
-          else
-          {
+          } else {
             // Get the product we are using
             boolean prodFound = false;
-            for (int idx = 0 ; idx < tmpProductList.getProductCount() ; idx++)
-            {
+            for (int idx = 0; idx < tmpProductList.getProductCount(); idx++) {
               tmpCPI = tmpProductList.getProduct(idx);
-              if (tmpCPI.getUTCValidFrom() <= CurrentRecord.UTCEventDate &&
-                  tmpCPI.getUTCValidTo() > CurrentRecord.UTCEventDate)
-              {
+              if (tmpCPI.getUTCValidFrom() <= CurrentRecord.UTCEventDate
+                      && tmpCPI.getUTCValidTo() > CurrentRecord.UTCEventDate) {
                 CurrentRecord.UsedProduct = tmpCPI.getProductID();
                 CurrentRecord.subscriptionID = tmpCPI.getSubID();
                 prodFound = true;
               }
             }
-            
-            if (prodFound == false)
-            {
+
+            if (prodFound == false) {
               // did not find any customer information
               CurrentRecord.addError(new RecordError("ERR_TARIFF_NOT_FOUND", ErrorType.DATA_NOT_FOUND));
             }
           }
         }
-      } 
-      catch (ProcessingException e)
-      {
+      } catch (ProcessingException e) {
         // error detected,
         getPipeLog().error(e.getMessage());
         RecordError tmpError = new RecordError("ERR_CUSTOMER_LOOKUP", ErrorType.SPECIAL);
@@ -173,17 +121,12 @@ public class CustomerLookup extends AbstractCustomerLookupAudited {
         CurrentRecord.addError(tmpError);
       }
     }
-    
+
     return (IRecord) CurrentRecord;
   }
 
-  /**
-   * @return 
-   * This is called when an error detail record is encountered.
-   */
   @Override
-  public IRecord procErrorRecord(IRecord r)
-  {
+  public IRecord procErrorRecord(IRecord r) {
     return null;
   }
 }

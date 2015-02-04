@@ -45,38 +45,16 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: PremiumLookup.java,v $
- * Revision 1.4  2014-05-24 11:21:25  ian
- * First version fraud
- *
- * Revision 1.3  2012-10-17 18:14:24  ian
- * Update for release
- *
- * Revision 1.2  2012-07-17 22:32:49  ian
- * WIP
- *
- * ====================================================================
- */
-
 package Tyfon;
 
 import OpenRate.process.AbstractRegexMatch;
 import OpenRate.record.IRecord;
 
 /**
- * This class is an example of the use of the rating processing module/data cache
- * pair. It uses the information from the data cache to calculate the cost of a
- * record according to the rating you define.
+ * Look up numbers which have a special premium rate attached to them.
  */
 public class PremiumLookup extends AbstractRegexMatch
 {
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: PremiumLookup.java,v $, $Revision: 1.4 $, $Date: 2014-05-24 11:21:25 $";
 
   // Regex search parameters - defined here for performance reasons
   private final String[] tmpSearchParameters = new String[1];
@@ -85,12 +63,6 @@ public class PremiumLookup extends AbstractRegexMatch
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------
 
- /**
-  * This is called when a data record is encountered. You should do any normal
-  * processing here.
-  * 
-  * @return 
-  */
   @Override
   public IRecord procValidRecord(IRecord r)
   {
@@ -119,13 +91,6 @@ public class PremiumLookup extends AbstractRegexMatch
     return r;
   }
 
- /**
-  * This is called when a data record with errors is encountered. You should do
-  * any processing here that you have to do for error records, e.g. statistics,
-  * special handling, even error correction!
-  * 
-   * @return 
-  */
   @Override
   public IRecord procErrorRecord(IRecord r)
   {

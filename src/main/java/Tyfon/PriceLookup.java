@@ -45,16 +45,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: PriceLookup.java,v $
- * Revision 1.3  2012-10-17 18:14:21  ian
- * Update for release
- *
- * Revision 1.2  2012-07-17 22:32:48  ian
- * WIP
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.process.AbstractRegexMatch;
@@ -62,92 +52,93 @@ import OpenRate.record.ChargePacket;
 import OpenRate.record.ErrorType;
 import OpenRate.record.IRecord;
 import OpenRate.record.RecordError;
+import OpenRate.record.TimePacket;
 
 /**
- * Look up the price group for the cases where we have to calculate the
- * retail price instead of just marking up.
+ * Look up the price group for the cases where we have to calculate the retail
+ * price instead of just marking up.
  */
-public class PriceLookup extends AbstractRegexMatch
-{
+public class PriceLookup extends AbstractRegexMatch {
+
   /**
    * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
+   * Version Audit log at Framework startup. For more information please
+   * <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click
+   * here</a> to go to wiki page.
    */
   public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: PriceLookup.java,v $, $Revision: 1.3 $, $Date: 2012-10-17 18:14:21 $";
 
   // Regex search parameters - defined here for performance reasons
   private final String[] tmpSearchParameters = new String[2];
-  
+
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------
-
- /**
-  * This is called when a data record is encountered. You should do any normal
-  * processing here.
-   * @return 
-  */
+  /**
+   * This is called when a data record is encountered. You should do any normal
+   * processing here.
+   *
+   * @return
+   */
   @Override
-  public IRecord procValidRecord(IRecord r)
-  {
-    TyfonRecord CurrentRecord = (TyfonRecord)r;
+  public IRecord procValidRecord(IRecord r) {
+    TyfonRecord CurrentRecord = (TyfonRecord) r;
 
     // We only transform the detail records, and leave the others alone
-    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD))
-    {
+    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
       // Markup types have already been dealt with, just deal with the others
-      if (CurrentRecord.isMarkup == false)
-      {
+      if (CurrentRecord.isMarkup == false) {
         // Find the price group and place them into the charge packets
-        for (int idx = 0 ; idx < CurrentRecord.getChargePacketCount() ; idx++)
-        {
-          ChargePacket tmpCP = CurrentRecord.getChargePacket(idx);
-          
-          if (tmpCP.Valid)
-          {
-            tmpSearchParameters[0] = tmpCP.zoneResult;
-            tmpSearchParameters[1] = tmpCP.timeResult;
-            String tmpPriceGroup = getRegexMatch(tmpCP.ratePlanName, tmpSearchParameters);
+        for (ChargePacket tmpCP : CurrentRecord.getChargePackets()) {
+          if (tmpCP.Valid) {
+            for (TimePacket tmpTZ : tmpCP.getTimeZones()) {
+              tmpSearchParameters[0] = tmpCP.zoneResult;
+              tmpSearchParameters[1] = tmpTZ.TimeResult;
 
-            if (isValidRegexMatchResult(tmpPriceGroup))
-            {
-              tmpCP.priceGroup = tmpPriceGroup;
+              String tmpPriceGroup = getRegexMatch(tmpCP.ratePlanName, tmpSearchParameters);
+
+              if (isValidRegexMatchResult(tmpPriceGroup)) {
+                tmpTZ.priceGroup = tmpPriceGroup;
+              } else {
+                // if this is a base product, error, otherwise turn the CP off
+                if (tmpCP.priority == 0) {
+                  // base product
+                  CurrentRecord.addError(new RecordError("ERR_BASE_PROD_PRICE_MAP", ErrorType.DATA_NOT_FOUND));
+                } else {
+                  // overlay product
+                  tmpCP.Valid = false;
+                }
+              }
             }
-            else
-            {
-              // if this is a base product, error, otherwise turn the CP off
-              if (tmpCP.priority == 0)
-              {
-                // base product
-                CurrentRecord.addError(new RecordError("ERR_BASE_PROD_PRICE_MAP", ErrorType.DATA_NOT_FOUND));
-              }
-              else
-              {
-                // overlay product
-                tmpCP.Valid = false;
-              }
+          }
+        }
+      } else {
+        // Default the price group to markup
+        for (ChargePacket tmpCP : CurrentRecord.getChargePackets()) {
+          if (tmpCP.Valid) {
+            for (TimePacket tmpTZ : tmpCP.getTimeZones()) {
+              tmpTZ.priceGroup = CurrentRecord.markupType;
             }
           }
         }
       }
     }
-    
+
     return r;
   }
 
- /**
-  * This is called when a data record with errors is encountered. You should do
-  * any processing here that you have to do for error records, e.g. statistics,
-  * special handling, even error correction!
-   * @return 
-  */
+  /**
+   * This is called when a data record with errors is encountered. You should do
+   * any processing here that you have to do for error records, e.g. statistics,
+   * special handling, even error correction!
+   *
+   * @return
+   */
   @Override
-  public IRecord procErrorRecord(IRecord r)
-  {
+  public IRecord procErrorRecord(IRecord r) {
     //transform((TyfonRecord)r);
-    
+
     return r;
   }
 }

@@ -45,25 +45,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: VenteloInputAdapter.java,v $
- * Revision 1.6  2014-03-12 20:44:56  ian
- * Update loading to respect end dates
- *
- * Revision 1.5  2012/12/01 00:28:35  ian
- * Recycle handling
- *
- * Revision 1.4  2012/11/30 21:28:08  ian
- * Update
- *
- * Revision 1.3  2012-10-17 18:14:23  ian
- * Update for release
- *
- * Revision 1.2  2012-07-17 22:32:50  ian
- * WIP
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.adapter.file.FlatFileInputAdapter;
@@ -71,36 +52,18 @@ import OpenRate.record.FlatRecord;
 import OpenRate.record.IRecord;
 
 /**
- * Instace of the input adapter for the Ventelo traffic type.
+ * Instance of the input adapter for the Ventelo traffic type.
  *
  * @author TGDSPIA1
  */
 public class VenteloInputAdapter extends FlatFileInputAdapter
 {
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: VenteloInputAdapter.java,v $, $Revision: 1.6 $, $Date: 2014-03-12 20:44:56 $";
-
   private int IntRecordNumber;
  
- /**
-  * Constructor for CustomizeInputAdapter.
-  */
-  public VenteloInputAdapter()
-  {
-      super();      
-  }
-
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------  
- /**
-  * This is called when the synthetic Header record is encountered, and has the
-  * meanining that the stream is starting. In this example we have nothing to do
-  */
+ 
   @Override
   public IRecord procHeader(IRecord r)
   {
@@ -109,18 +72,6 @@ public class VenteloInputAdapter extends FlatFileInputAdapter
     return r;
   }
 
- /**
-  * This is called when a data record is encountered. You should do any normal
-  * processing here. For the input adapter, we probably want to change the 
-  * record type from FlatRecord to the record(s) type that we will be using in
-  * the processing pipeline.
-  *
-  * This is also the location for accumulating records into logical groups
-  * (that is records with sub records) and placing them in the pipeline as
-  * they are completed. If you receive a sub record, simply return a null record
-  * in this method to indicate that you are handling it, and that it will be
-  * purged at a later date.
-  */
   @Override
   public IRecord procValidRecord(IRecord r)
   {
@@ -173,13 +124,6 @@ public class VenteloInputAdapter extends FlatFileInputAdapter
     return (IRecord) tmpDataRecord;
   }
 
- /**
-  * This is called when a data record with errors is encountered. You should do
-  * any processing here that you have to do for error records, e.g. stratistics,
-  * special handling, even error correction!
-  * 
-  * The input adapter is not expected to provide any records here.
-  */
   @Override
   public IRecord procErrorRecord(IRecord r)
   {
@@ -188,11 +132,6 @@ public class VenteloInputAdapter extends FlatFileInputAdapter
     return r;
   }
 
- /**
-  * This is called when the synthetic trailer record is encountered, and has the
-  * meanining that the stream is now finished. In this example, all we do is 
-  * pass the control back to the transactional layer.
-  */
   @Override
   public IRecord procTrailer(IRecord r)
   {

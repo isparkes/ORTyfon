@@ -48,22 +48,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: ProvRecord.java,v $
- * Revision 1.4  2014-03-14 15:37:38  ian
- * Update loading to respect end dates
- *
- * Revision 1.3  2014/03/12 20:44:56  ian
- * Update loading to respect end dates
- *
- * Revision 1.2  2012/10/28 09:41:13  ian
- * Update to have subscriptionID
- *
- * Revision 1.1  2012-10-17 18:14:28  ian
- * Update for release
- *
- * ====================================================================
- */
 package Provisioning;
 
 import OpenRate.record.FlatRecord;
@@ -75,6 +59,8 @@ import java.util.ArrayList;
  */
 public class ProvRecord extends FlatRecord
 { 
+  private static final long serialVersionUID = 1129371292L;
+  
   private String custId;
   private String serviceId;
   private String number;

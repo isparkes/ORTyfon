@@ -48,13 +48,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: Rating.java,v $
- * Revision 1.1  2012-10-17 18:14:24  ian
- * Update for release
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.exception.InitializationException;
@@ -65,68 +58,34 @@ import OpenRate.record.IRecord;
 import OpenRate.record.RecordError;
 
 /**
- * This class is a bit of a fat Filter, doing all of the Pollux logic evaluation
- * and slection in one go. It uses information from three cache objects
- * to evaluate the logic candidate to use for the rating
+ * Perform the core rating. Set up the module to report rating exceptions back
+ * to us, rather than assigning the internal error code.
  */
-public class Rating extends AbstractRUMRateCalc
-{
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: Rating.java,v $, $Revision: 1.1 $, $Date: 2012-10-17 18:14:24 $";
-
-
+public class Rating extends AbstractRUMRateCalc {
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------
- /**
-  * Initialise the module. Called during pipeline creation to initialise:
-  *  - Configuration properties that are defined in the properties file.
-  *  - The references to any cache objects that are used in the processing
-  *  - The symbolic name of the module
-  *
-  * @param PipelineName The name of the pipeline this module is in
-  * @param ModuleName The name of this module in the pipeline
-  * @throws OpenRate.exception.InitializationException
-  */
+
   @Override
   public void init(String PipelineName, String ModuleName)
-            throws InitializationException
-  {
+          throws InitializationException {
     // Do the inherited work, e.g. setting the symbolic name etc
-    super.init(PipelineName,ModuleName);
+    super.init(PipelineName, ModuleName);
 
     // Set exception reporting - we want to manage the exceptions
     this.setExceptionReporting(true);
   }
-  
- /**
-  * This is called when a data record is encountered. You should do any normal
-  * processing here.
-  */
+
   @Override
-  public IRecord procValidRecord(IRecord r)
-  {
+  public IRecord procValidRecord(IRecord r) {
     RecordError tmpError;
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
-    // First of all, see what the session time is if we are calculating
-    // the max session time. In a second step we will then rate the session
-    // time in order to know the amount of money to reserve
-    // Lookup the customer for all cases
-    // We only transform the detail records, and leave the others alone
-    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD))
-    {
-      try
-      {
-        PerformRating(CurrentRecord);
-      }
-      catch (ProcessingException pe)
-      {
+    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
+      try {
+        performRating(CurrentRecord);
+      } catch (ProcessingException pe) {
         tmpError = new RecordError("ERR_RATE_LOOKUP", ErrorType.SPECIAL, getSymbolicName(), pe.getMessage());
         CurrentRecord.addError(tmpError);
       }
@@ -135,13 +94,9 @@ public class Rating extends AbstractRUMRateCalc
     return r;
   }
 
- /**
-  * No processing for error records.
-  */
   @Override
   public IRecord procErrorRecord(IRecord r) {
 
-      return r;
+    return r;
   }
 }
-

@@ -45,13 +45,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: CallScenarioLookup.java,v $
- * Revision 1.1  2012-10-17 18:14:22  ian
- * Update for release
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.process.AbstractRegexMatch;
@@ -59,72 +52,46 @@ import OpenRate.record.IRecord;
 
 /**
  * This Module manages the call scenarios which we are rating for. The following
- * cases are managed:
- *  - Certain special numbers are markup only (in order to manage these more
- *    easily than tracking prices individually). This managed in this module so
- *    that we do not have to deal with unknown prefixes, we just treat these
- *    destinations as "opaque" numbers and do not try to look into them
+ * cases are managed: - Certain special numbers are markup only (in order to
+ * manage these more easily than tracking prices individually). This managed in
+ * this module so that we do not have to deal with unknown prefixes, we just
+ * treat these destinations as "opaque" numbers and do not try to look into them
  */
-public class CallScenarioLookup extends AbstractRegexMatch
-{
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: CallScenarioLookup.java,v $, $Revision: 1.1 $, $Date: 2012-10-17 18:14:22 $";
+public class CallScenarioLookup extends AbstractRegexMatch {
 
   // used to perform the lookup - defined here for performance reasons
   String[] searchParams = new String[1];
-  
+
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------
-
- /**
-  * This is called when a data record is encountered. You should do any normal
-  * processing here.
-   * @return 
-  */
   @Override
-  public IRecord procValidRecord(IRecord r)
-  {
-    TyfonRecord CurrentRecord = (TyfonRecord)r;
-    
-    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD))
-    {
+  public IRecord procValidRecord(IRecord r) {
+    TyfonRecord CurrentRecord = (TyfonRecord) r;
+
+    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
       // check if this is one of the markup scenarios
       searchParams[0] = CurrentRecord.supplier;
       String markupType = getRegexMatch("Default", searchParams);
-    
+
       // If we got a match, process it
-      if (isValidRegexMatchResult(markupType))
-      {
+      if (isValidRegexMatchResult(markupType)) {
         // Mark that we are marking up and set the key
         CurrentRecord.markupType = markupType;
-        CurrentRecord.isMarkup   = true;
-      }
-      else
-      {
+        CurrentRecord.isMarkup = true;
+      } else {
         // Set that we are not marking up
         CurrentRecord.markupType = "";
-        CurrentRecord.isMarkup   = false;
+        CurrentRecord.isMarkup = false;
       }
-    }    
+    }
 
     return r;
   }
 
- /**
-  * This is called when a data record with errors is encountered. You should do
-  * any processing here that you have to do for error records, e.g. stratistics,
-  * special handling, even error correction!
-   * @return 
-  */
   @Override
-  public IRecord procErrorRecord(IRecord r)
-  {
+  public IRecord procErrorRecord(IRecord r) {
     return r;
   }
 }

@@ -45,138 +45,73 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: TyfonInputAdapter.java,v $
- * Revision 1.5  2014-05-23 07:22:47  ian
- * First version fraud WIP
- *
- * Revision 1.4  2014-03-12 20:44:56  ian
- * Update loading to respect end dates
- *
- * Revision 1.3  2012/10/17 18:14:23  ian
- * Update for release
- *
- * Revision 1.2  2012-07-17 22:32:50  ian
- * WIP
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.adapter.file.FlatFileInputAdapter;
 import OpenRate.record.FlatRecord;
 import OpenRate.record.IRecord;
 
-public class TyfonInputAdapter extends FlatFileInputAdapter
-{
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: TyfonInputAdapter.java,v $, $Revision: 1.5 $, $Date: 2014-05-23 07:22:47 $";
+/**
+ * Read records from the Tyfon input file.
+ *
+ * @author ian
+ */
+public class TyfonInputAdapter extends FlatFileInputAdapter {
 
   private int IntRecordNumber = 0;
- 
+
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------  
- /**
-  * This is called when the synthetic Header record is encountered, and has the
-  * meanining that the stream is starting. In this example we have nothing to do
-  * 
-  * @return processed header
-  */
   @Override
-  public IRecord procHeader(IRecord r)
-  {
+  public IRecord procHeader(IRecord r) {
     IntRecordNumber = 0;
-    
+
     return r;
   }
 
- /**
-  * This is called when a data record is encountered. You should do any normal
-  * processing here. For the input adapter, we probably want to change the 
-  * record type from FlatRecord to the record(s) type that we will be using in
-  * the processing pipeline.
-  *
-  * This is also the location for accumulating records into logical groups
-  * (that is records with sub records) and placing them in the pipeline as
-  * they are completed. If you receive a sub record, simply return a null record
-  * in this method to indicate that you are handling it, and that it will be
-  * purged at a later date.
-  * 
-  * @return processed valid record
-  */
   @Override
-  public IRecord procValidRecord(IRecord r)
-  {
+  public IRecord procValidRecord(IRecord r) {
 
     TyfonRecord tmpDataRecord;
     FlatRecord tmpFlatRecord;
 
-   /* The source of the record is FlatRecord, because we are using the
-    * FlatFileInputAdapter as the source of the records. We cast the record
-    * to this to extract the data, and then create the target record type
-    * (CustomizedRecord) and cast this back to the generic class before passing
-    * back
-    */
-    tmpFlatRecord = (FlatRecord)r;
-    
+    /* The source of the record is FlatRecord, because we are using the
+     * FlatFileInputAdapter as the source of the records. We cast the record
+     * to this to extract the data, and then create the target record type
+     * (CustomizedRecord) and cast this back to the generic class before passing
+     * back
+     */
+    tmpFlatRecord = (FlatRecord) r;
+
     tmpDataRecord = new TyfonRecord();
-    
+
     // Check the record type
-    if (tmpFlatRecord.getData().startsWith(TyfonRecord.VENTELO_TYPE_DETAIL))
-    {  
+    if (tmpFlatRecord.getData().startsWith(TyfonRecord.VENTELO_TYPE_DETAIL)) {
       tmpDataRecord.mapVenteloDetailRecord(tmpFlatRecord.getData());
       IntRecordNumber++;
       tmpDataRecord.RecordNumber = IntRecordNumber;
-    }
-    else if (tmpFlatRecord.getData().startsWith(TyfonRecord.VENTELO_TYPE_HEADER))
-    {
+    } else if (tmpFlatRecord.getData().startsWith(TyfonRecord.VENTELO_TYPE_HEADER)) {
       tmpDataRecord.mapVenteloHeaderRecord(tmpFlatRecord.getData());
-    }
-    else if (tmpFlatRecord.getData().startsWith(TyfonRecord.VENTELO_TYPE_TRAILER))
-    {
+    } else if (tmpFlatRecord.getData().startsWith(TyfonRecord.VENTELO_TYPE_TRAILER)) {
       tmpDataRecord.mapVenteloTrailerRecord(tmpFlatRecord.getData());
-    }
-    else
-    {
+    } else {
       tmpDataRecord.mapUnknownRecord(tmpFlatRecord.getData());
     }
-    
+
     // Return the modified record in the Common record format (IRecord)
     return (IRecord) tmpDataRecord;
   }
 
- /**
-  * This is called when a data record with errors is encountered. You should do
-  * any processing here that you have to do for error records, e.g. stratistics,
-  * special handling, even error correction!
-  * 
-  * The input adapter is not expected to provide any records here.
-  * 
-  * @return processed error record
-  */
   @Override
-  public IRecord procErrorRecord(IRecord r)
-  {
+  public IRecord procErrorRecord(IRecord r) {
     // The FlatFileInputAdapter is not able to create error records, so we
     // do not have to do anything for this
     return r;
   }
 
- /**
-  * This is called when the synthetic trailer record is encountered, and has the
-  * meaning that the stream is now finished. In this example, all we do is 
-  * pass the control back to the transactional layer.
-  * 
-  * @return processed trailer record
-  */
   @Override
-  public IRecord procTrailer(IRecord r)
-  {
+  public IRecord procTrailer(IRecord r) {
 
     return r;
   }

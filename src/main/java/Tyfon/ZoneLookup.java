@@ -45,25 +45,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: ZoneLookup.java,v $
- * Revision 1.6  2014-05-24 11:21:25  ian
- * First version fraud
- *
- * Revision 1.5  2014-03-12 20:44:56  ian
- * Update loading to respect end dates
- *
- * Revision 1.4  2012/11/30 21:28:08  ian
- * Update
- *
- * Revision 1.3  2012-10-17 18:14:24  ian
- * Update for release
- *
- * Revision 1.2  2012-07-17 22:32:49  ian
- * WIP
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.process.AbstractBestMatch;
@@ -75,104 +56,75 @@ import java.util.ArrayList;
 
 /**
  * Look up the zone result, category and type based on the B Number. The zone
- * result is used to calculate the zone for priving purposes, the category is
+ * result is used to calculate the zone for rating purposes, the category is
  * used for billing output information and markup, and the type is used for
  * markup.
  */
-public class ZoneLookup extends AbstractBestMatch
-{
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: ZoneLookup.java,v $, $Revision: 1.6 $, $Date: 2014-05-24 11:21:25 $";
+public class ZoneLookup extends AbstractBestMatch {
 
   // convenience variables
+
   private final int IDX_ZONE_RESULT = 0;    // Zone result used for rating
-  private final int IDX_ZONE_CAT    = 1;    // Category: World
-  private final int IDX_ZONE_TYPE   = 2;    // Fixed or mobile
-  
+  private final int IDX_ZONE_CAT = 1;    // Category: World
+  private final int IDX_ZONE_TYPE = 2;    // Fixed or mobile
+
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------
-
-  /**
-  * This is called when a data record is encountered. You should do any normal
-  * processing here.
-  *
-  * This transformation looks up the zone name prefix using the best match
-  * ZoneCache lookup. Because this example does not care about services, we
-  * define the service type as a default "DEF".
-  * 
-  * @return 
-  */
   @Override
-  public IRecord procValidRecord(IRecord r)
-  {
+  public IRecord procValidRecord(IRecord r) {
     RecordError tmpError;
     ArrayList<String> ZoneValue;
-    TyfonRecord CurrentRecord = (TyfonRecord)r;
+    TyfonRecord CurrentRecord = (TyfonRecord) r;
 
     // We only transform the detail records, and leave the others alone
-    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.FRAUD_DETAIL_RECORD))
-    {      
+    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.FRAUD_DETAIL_RECORD)) {
       // Look up the destinations for the charge packets
       // Markup types have already been dealt with, just deal with the others
-      if (CurrentRecord.isMarkup)
-      {
+      if (CurrentRecord.isMarkup) {
         // Try to look up, warn if fails
         // ***************************** Info **********************************
         // Look up the Destination from the general list
         ZoneValue = getBestMatchWithChildData("Default", CurrentRecord.B_NumberNorm);
 
-        if (isValidBestMatchResult(ZoneValue))
-        {
+        if (isValidBestMatchResult(ZoneValue)) {
           // Write the information back into the record
-          CurrentRecord.Destination     = ZoneValue.get(IDX_ZONE_RESULT);
-          CurrentRecord.Zone_Cat        = ZoneValue.get(IDX_ZONE_CAT);
+          CurrentRecord.Destination = ZoneValue.get(IDX_ZONE_RESULT);
+          CurrentRecord.Zone_Cat = ZoneValue.get(IDX_ZONE_CAT);
           CurrentRecord.Dest_Phone_Type = ZoneValue.get(IDX_ZONE_TYPE);
-        }
-        else
-        {
+        } else {
           // no zone found, warn
           getPipeLog().warning("Could not find zone info for B Number <" + CurrentRecord.B_NumberNorm + ">");
 
           // Default the info - should not be used
-          CurrentRecord.Destination     = "Markup";
-          CurrentRecord.Zone_Cat        = "Markup";
+          CurrentRecord.Destination = "Markup";
+          CurrentRecord.Zone_Cat = "Markup";
           CurrentRecord.Dest_Phone_Type = "Markup";
         }
-        
+
         // ****************************** CPs **********************************
         // Find the price group and place them into the charge packets
-        for (int idx = 0 ; idx < CurrentRecord.getChargePacketCount() ; idx++)
-        {
+        for (int idx = 0; idx < CurrentRecord.getChargePacketCount(); idx++) {
           ChargePacket tmpCP = CurrentRecord.getChargePacket(idx);
 
           // Show the zone model we are using
           tmpCP.zoneModel = tmpCP.ratePlanName;
           tmpCP.zoneResult = "Markup";
-          tmpCP.zoneInfo   = "Markup";
+          tmpCP.zoneInfo = "Markup";
         }
-      }
-      else
-      {
+      } else {
         // ***************************** Info **********************************
         // Look up the Destination from the general list
         ZoneValue = getBestMatchWithChildData("Default", CurrentRecord.B_NumberNorm);
 
-        if (isValidBestMatchResult(ZoneValue))
-        {
+        if (isValidBestMatchResult(ZoneValue)) {
           // Write the information back into the record
-          CurrentRecord.Destination     = ZoneValue.get(IDX_ZONE_RESULT);
-          CurrentRecord.Zone_Cat        = ZoneValue.get(IDX_ZONE_CAT);
+          CurrentRecord.Destination = ZoneValue.get(IDX_ZONE_RESULT);
+          CurrentRecord.Zone_Cat = ZoneValue.get(IDX_ZONE_CAT);
           CurrentRecord.Dest_Phone_Type = ZoneValue.get(IDX_ZONE_TYPE);
-        }
-        else
-        {
+        } else {
           // no zone found, add an error to the record
           tmpError = new RecordError("ERR_ZONE_LOOKUP", ErrorType.SPECIAL);
           CurrentRecord.addError(tmpError);
@@ -180,29 +132,22 @@ public class ZoneLookup extends AbstractBestMatch
 
         // ****************************** CPs **********************************
         // Find the price group and place them into the charge packets
-        for (int idx = 0 ; idx < CurrentRecord.getChargePacketCount() ; idx++)
-        {
+        for (int idx = 0; idx < CurrentRecord.getChargePacketCount(); idx++) {
           ChargePacket tmpCP = CurrentRecord.getChargePacket(idx);
 
           // Show the zone model we are using
           tmpCP.zoneModel = tmpCP.ratePlanName;
           ZoneValue = getBestMatchWithChildData(tmpCP.ratePlanName, CurrentRecord.B_NumberNorm);
-          
-          if (this.isValidBestMatchResult(ZoneValue))
-          {
+
+          if (this.isValidBestMatchResult(ZoneValue)) {
             tmpCP.zoneResult = ZoneValue.get(IDX_ZONE_RESULT);
-            tmpCP.zoneInfo   = ZoneValue.get(IDX_ZONE_CAT);
-          }
-          else
-          {
+            tmpCP.zoneInfo = ZoneValue.get(IDX_ZONE_CAT);
+          } else {
             // if this is a base product, error, otherwise turn the CP off
-            if (tmpCP.priority == 0)
-            {
+            if (tmpCP.priority == 0) {
               // base product
               CurrentRecord.addError(new RecordError("ERR_BASE_PROD_ZONE_MAP", ErrorType.DATA_NOT_FOUND));
-            }
-            else
-            {
+            } else {
               // overlay product
               tmpCP.Valid = false;
             }
@@ -214,16 +159,8 @@ public class ZoneLookup extends AbstractBestMatch
     return r;
   }
 
-  /**
-  * This is called when a data record with errors is encountered. You should do
-  * any processing here that you have to do for error records, e.g. statistics,
-  * special handling, even error correction!
-  * 
-  * @return 
-  */
   @Override
-  public IRecord procErrorRecord(IRecord r)
-  {
+  public IRecord procErrorRecord(IRecord r) {
     return r;
   }
 }

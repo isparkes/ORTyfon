@@ -48,22 +48,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: RateRounding.java,v $
- * Revision 1.4  2014-05-24 11:21:25  ian
- * First version fraud
- *
- * Revision 1.3  2014-03-12 20:44:56  ian
- * Update loading to respect end dates
- *
- * Revision 1.2  2012/11/30 21:28:08  ian
- * Update
- *
- * Revision 1.1  2012-10-17 18:14:24  ian
- * Update for release
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.process.AbstractStubPlugIn;
@@ -78,149 +62,109 @@ import java.util.Iterator;
  *
  * @author ian
  */
-public class RateRounding extends AbstractStubPlugIn
-{  
-  /**
-   * CVS version info - Automatically captured and written to the Framework
-   * Version Audit log at Framework startup. For more information
-   * please <a target='new' href='http://www.open-rate.com/wiki/index.php?title=Framework_Version_Map'>click here</a> to go to wiki page.
-   */
-  public static String CVS_MODULE_INFO = "OpenRate, $RCSfile: RateRounding.java,v $, $Revision: 1.4 $, $Date: 2014-05-24 11:21:25 $";
-
+public class RateRounding extends AbstractStubPlugIn {
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------
 
- /**
-  * For all good records, this module enriches the CDR record with the
-  * information from the Accounting Info and Time Info records.
-  * 
-  * @param r The record we are working on
-  * @return The processed record
-  */
   @Override
-  public IRecord procValidRecord(IRecord r)
-  {
+  public IRecord procValidRecord(IRecord r) {
     double defaultTotalCost = 0;
     double defaultConnCost = 0;
     double overlayTotalCost = 0;
     double overlayConnCost = 0;
     boolean overlayUsed = false;
-    
+
     TyfonRecord CurrentRecord = (TyfonRecord) r;
-    
+
     // We only transform the detail records, and leave the others alone
-    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD))
-    {
+    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
       // No custom rate so use the standard one
       // pick out the connect cost part and create the steps serialisation
-      Iterator<ChargePacket> cpIter =  CurrentRecord.getChargePackets().iterator();
-      while (cpIter.hasNext())
-      {
+      Iterator<ChargePacket> cpIter = CurrentRecord.getChargePackets().iterator();
+      while (cpIter.hasNext()) {
         ChargePacket tmpCP = cpIter.next();
 
         // Gather from valid CPs with rating info
-        if ((tmpCP.breakDown != null) && (tmpCP.Valid))
-        {
+        if ((tmpCP.breakDown != null) && (tmpCP.Valid)) {
           // Standard Rating
-          if (tmpCP.packetType.equals("R"))
-          {
+          if (tmpCP.packetType.equals("R")) {
             Iterator<RatingBreakdown> rbIter = tmpCP.breakDown.iterator();
-            while (rbIter.hasNext())
-            {
+            while (rbIter.hasNext()) {
               RatingBreakdown rb = rbIter.next();
 
               // Gather the steps
               defaultTotalCost += rb.ratedAmount;
-              
+
               // Get the set up cost
-              if (rb.tierFrom == rb.tierTo)
-              {
+              if (rb.tierFrom == rb.tierTo) {
                 defaultConnCost = rb.ratedAmount;
               }
             }
           }
 
           // overlay rating
-          if (tmpCP.packetType.equals("O"))
-          {
+          if (tmpCP.packetType.equals("O")) {
             // mark that we should use the overlay price
             overlayUsed = true;
 
             Iterator<RatingBreakdown> rbIter = tmpCP.breakDown.iterator();
-            while (rbIter.hasNext())
-            {
+            while (rbIter.hasNext()) {
               RatingBreakdown rb = rbIter.next();
 
               // Gather the steps and total cost
               overlayTotalCost += rb.ratedAmount;
-              
+
               // Get the set up cost
-              if (rb.tierFrom == rb.tierTo)
-              {
+              if (rb.tierFrom == rb.tierTo) {
                 overlayConnCost = rb.ratedAmount;
               }
             }
           }
-        }        
+        }
       }
-      
+
       // now pick the right one
-      if (overlayUsed)
-      {
+      if (overlayUsed) {
         CurrentRecord.outputTotalCost = overlayTotalCost;
         CurrentRecord.outputConnCost = overlayConnCost;
-      }
-      else
-      {
+      } else {
         CurrentRecord.outputTotalCost = defaultTotalCost;
         CurrentRecord.outputConnCost = defaultConnCost;
       }
-        
+
       // perform rounding, currently fixed VAT and use ConfCode to decide on fixed discount
       double tmpAmount;
-      tmpAmount= CurrentRecord.outputTotalCost;
+      tmpAmount = CurrentRecord.outputTotalCost;
       CurrentRecord.outputTotalCost = ConversionUtils.getConversionUtilsObject().getRoundedValue(tmpAmount, 2);
       tmpAmount = CurrentRecord.outputConnCost;
-      CurrentRecord.outputConnCost  = ConversionUtils.getConversionUtilsObject().getRoundedValue(tmpAmount, 2);
-      
+      CurrentRecord.outputConnCost = ConversionUtils.getConversionUtilsObject().getRoundedValue(tmpAmount, 2);
+
       // Perform the margin check
       double margin;
-      if (CurrentRecord.outputTotalCost == 0)
-      {
+      if (CurrentRecord.outputTotalCost == 0) {
         CurrentRecord.marginFlag = "OK";
-      }
-      else
-      {
-        margin = (CurrentRecord.outputTotalCost - CurrentRecord.origAmount)/CurrentRecord.outputTotalCost;
-        if (margin < 0)
+      } else {
+        margin = (CurrentRecord.outputTotalCost - CurrentRecord.origAmount) / CurrentRecord.outputTotalCost;
+        if (margin < 0) {
           CurrentRecord.marginFlag = "loss";
-        else if (margin == 0) 
+        } else if (margin == 0) {
           CurrentRecord.marginFlag = "equal";
-        else if (margin < .25) 
+        } else if (margin < .25) {
           CurrentRecord.marginFlag = "low";
-        else
+        } else {
           CurrentRecord.marginFlag = "OK";
+        }
       }
     }
-    
+
     return r;
   }
 
- /**
-  * This is called when a data record with errors is encountered. You should do
-  * any processing here that you have to do for error records, e.g. stratistics,
-  * special handling, even error correction!
-  *
-  * @param r The record we are working on
-  * @return The processed record
-  */
   @Override
-  public IRecord procErrorRecord(IRecord r)
-  {
+  public IRecord procErrorRecord(IRecord r) {
     // do nothing
     return r;
   }
 }
-
