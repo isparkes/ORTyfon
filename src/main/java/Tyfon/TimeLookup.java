@@ -64,12 +64,12 @@ import OpenRate.record.TimePacket;
 
 /**
  * Look up the time zone of each record. Because we are not doing time splitting
- * we know that this will result in no time splitting, so therefore we can use
- * the simplified process of just assigning the time zone directly into the time
- * packet.
- * 
- * Only the TimeResult field is read by rating so we will only put information
- * in that field.
+ we know that this will result in no time splitting, so therefore we can use
+ the simplified process of just assigning the time zone directly into the time
+ packet.
+ 
+ Only the timeResult field is read by rating so we will only put information
+ in that field.
  */
 public class TimeLookup extends AbstractTimeMatch {
   // -----------------------------------------------------------------------------
@@ -86,7 +86,7 @@ public class TimeLookup extends AbstractTimeMatch {
       for (ChargePacket tmpCP : CurrentRecord.getChargePackets()) {
         CurrentRecord.TimeZone = getTimeZone(tmpCP.timeModel, CurrentRecord.UTCEventDate);
         TimePacket tmpTZ = new TimePacket();
-        tmpTZ.TimeResult = CurrentRecord.TimeZone;
+        tmpTZ.timeResult = CurrentRecord.TimeZone;
         tmpCP.addTimeZone(tmpTZ);
       }
     }

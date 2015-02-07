@@ -94,7 +94,7 @@ public class PriceLookup extends AbstractRegexMatch {
           if (tmpCP.Valid) {
             for (TimePacket tmpTZ : tmpCP.getTimeZones()) {
               tmpSearchParameters[0] = tmpCP.zoneResult;
-              tmpSearchParameters[1] = tmpTZ.TimeResult;
+              tmpSearchParameters[1] = tmpTZ.timeResult;
 
               String tmpPriceGroup = getRegexMatch(tmpCP.ratePlanName, tmpSearchParameters);
 
