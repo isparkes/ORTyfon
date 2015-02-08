@@ -489,7 +489,6 @@
 
     <CacheFactory>
       <ClassName>OpenRate.resource.CacheFactory</ClassName>
-      <ModuleName>CacheFactory</ModuleName>
       <CacheableClass>
         <CallScenarioCache>
           <ClassName>OpenRate.cache.RegexMatchCache</ClassName>
