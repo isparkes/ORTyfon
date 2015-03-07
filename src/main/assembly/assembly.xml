@@ -47,7 +47,7 @@
 
     <!-- Copy over all the scripts we have -->
     <fileSet>
-      <directory>src/main/bin</directory>
+      <directory>src/main/resources/bin</directory>
       <outputDirectory>bin</outputDirectory>
       <includes>
         <include>**/*.template</include>

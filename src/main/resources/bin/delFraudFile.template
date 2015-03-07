@@ -1,0 +1,5 @@
+open <host>
+user <user> <pass>
+del FILE_TO_GET
+bye
+quit

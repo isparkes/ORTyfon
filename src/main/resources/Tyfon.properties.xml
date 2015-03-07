@@ -335,6 +335,9 @@
     </OutputAdapter>
   </ProvisioningLoader>
 
+  <!--========================================================-->
+  <!--  used for processing records from fraud source files   -->
+  <!--========================================================-->
   <FraudPipe>
     <InputAdapter>
       <CInpAdapter>
@@ -383,8 +386,8 @@
         <DailyTotalDurationLimit>100000</DailyTotalDurationLimit>
         <HourlyTotalDurationLimit>10000</HourlyTotalDurationLimit>
         <MonthlyCallTypeDurationLimit>100000</MonthlyCallTypeDurationLimit>
-        <DailyCallTypeDurationLimit>100000</DailyCallTypeDurationLimit>
-        <HourlyCallTypeDurationLimit>10000</HourlyCallTypeDurationLimit>
+        <DailyCallTypeDurationLimit>30000</DailyCallTypeDurationLimit>
+        <HourlyCallTypeDurationLimit>4000</HourlyCallTypeDurationLimit>
         <MonthlyTotalCountLimit>2000</MonthlyTotalCountLimit>
         <DailyTotalCountLimit>200</DailyTotalCountLimit>
         <HourlyTotalCountLimit>30</HourlyTotalCountLimit>
@@ -412,7 +415,7 @@
     </Process>
 
     <OutputAdapter>
-      <FGoodOutAdapter>
+      <CGoodOutAdapter>
         <ClassName>fraud.XMLOutputAdapter</ClassName>
         <OutputName>GoodOutput</OutputName>
         <BatchSize>5000</BatchSize>
@@ -421,8 +424,8 @@
         <OutputFilePrefix>alertfile-</OutputFilePrefix>
         <OutputFileSuffix>.xml</OutputFileSuffix>
         <SingleOutputFile>True</SingleOutputFile>
-        <DeleteEmptyOutputFile>False</DeleteEmptyOutputFile>
-      </FGoodOutAdapter>
+        <DeleteEmptyOutputFile>True</DeleteEmptyOutputFile>
+      </CGoodOutAdapter>
     </OutputAdapter>
   </FraudPipe>
   

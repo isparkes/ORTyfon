@@ -1,0 +1,39 @@
+# m	h	dom	mon	dow	command
+
+# Startup openrate process at bootup (after waiting for 120 seconds)
+@reboot					sleep 120 && /opt/ORTyfon/bin/startup.sh
+
+# Create daily backup of the database
+13	3	*	*	*	/opt/ORTyfon/bin/backupdb.sh
+
+#weekly offsite encrypted backup
+53 	3 	* 	* 	0 	/opt/ORTyfon/bin/weeklyBackup.sh
+
+# get the provisioning files from the staging directory, and put the processed CDR files back there
+15	*	*	*	*	/opt/ORTyfon/bin/MoveTraffic.sh >/dev/null
+
+# clean up the processing direcory
+0	*	*	*	*	/opt/ORTyfon/bin/TarArchive.sh >/dev/null
+0	*	*	*	*	/opt/ORTyfon/bin/TarFraud.sh >/dev/null
+
+# Every night, reload the reference data
+15	0	*	*	*	/opt/ORTyfon/bin/reload_caches.sh
+
+# recycle suspended traffic files once the reference data is up to date
+25	0	*	*	*	/opt/ORTyfon/bin/recycle_suspended.sh >/dev/null
+
+# pull ventelo CDRs from the FTP server every 30 minutes
+15,45	*	*	*	*	/opt/ORTyfon/bin/getCDR.ventelo.sh
+
+# Monitor the rejections
+15      2	*	*	*	/opt/ORTyfon/bin/monitorLogs.sh
+
+# Monitor the disk space
+17	5	*	*	*	/opt/ORTyfon/bin/monitorDisk.sh
+
+# Get Fraud Files every 5 minutes
+17	*	*	*	*	/opt/ORTyfon/bin/pullFraud.sh >/dev/null
+32	*	*	*	*	/opt/ORTyfon/bin/pullFraud.sh >/dev/null
+47	*	*	*	*	/opt/ORTyfon/bin/pullFraud.sh >/dev/null
+02	*	*	*	*	/opt/ORTyfon/bin/pullFraud.sh >/dev/null
+
