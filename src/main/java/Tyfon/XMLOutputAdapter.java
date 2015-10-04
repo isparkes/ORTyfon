@@ -95,9 +95,9 @@ public class XMLOutputAdapter extends FlatFileOutputAdapter {
     tmpOutRecord = new FlatRecord();
     CurrentRecord = (TyfonRecord) r;
 
-    // We only transform the detail records, and leave the others alone
     if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)) {
       tmpOutRecord.setData("\t<call>\n"
               + wrapValue("customerId", CurrentRecord.CustIDA)
               + wrapValue("subscriptionId", CurrentRecord.subscriptionID)

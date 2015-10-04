@@ -80,9 +80,9 @@ public class SuspensePreparation
   public IRecord procValidRecord(IRecord r) {
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
-    // We only transform the detail records, and leave the others alone
     if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)) {
       // set the good output
       CurrentRecord.addOutput(GOOD_OUTPUT);
       //CurrentRecord.addOutput(BAL_OUTPUT);
@@ -100,9 +100,9 @@ public class SuspensePreparation
 
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
-    // We only transform the detail records, and leave the others alone
     if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)) {
       // see if the record has errors
       if (CurrentRecord.getErrorCount() > 0) {
         // if so, get the first error

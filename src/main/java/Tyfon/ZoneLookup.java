@@ -77,9 +77,9 @@ public class ZoneLookup extends AbstractBestMatch {
     ArrayList<String> ZoneValue;
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
-    // We only transform the detail records, and leave the others alone
     if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
             || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)
             || (CurrentRecord.RECORD_TYPE == TyfonRecord.FRAUD_DETAIL_RECORD)) {
       // Look up the destinations for the charge packets
       // Markup types have already been dealt with, just deal with the others

@@ -84,9 +84,9 @@ public class PriceLookup extends AbstractRegexMatch {
   public IRecord procValidRecord(IRecord r) {
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
-    // We only transform the detail records, and leave the others alone
     if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)) {
       // Markup types have already been dealt with, just deal with the others
       if (CurrentRecord.isMarkup == false) {
         // Find the price group and place them into the charge packets

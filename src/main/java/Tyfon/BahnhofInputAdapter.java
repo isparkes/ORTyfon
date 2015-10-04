@@ -47,52 +47,67 @@
  */
 package Tyfon;
 
-import OpenRate.process.AbstractRegexMatch;
+import OpenRate.adapter.file.FlatFileInputAdapter;
+import OpenRate.record.FlatRecord;
 import OpenRate.record.IRecord;
 
 /**
- * This Module manages the call scenarios which we are rating for. The following
- * cases are managed: - Certain special numbers are markup only (in order to
- * manage these more easily than tracking prices individually). This managed in
- * this module so that we do not have to deal with unknown prefixes, we just
- * treat these destinations as "opaque" numbers and do not try to look into them
+ * Instance of the input adapter for the Bahnhof traffic type.
+ *
+ * This file has a single header, n details and no trailer The header record is
+ * a format descriptor with a fixed prefix.
+ *
+ *
+ * @author TGDSPIA1
  */
-public class CallScenarioLookup extends AbstractRegexMatch {
+public class BahnhofInputAdapter extends FlatFileInputAdapter {
 
-  // used to perform the lookup - defined here for performance reasons
-  String[] searchParams = new String[1];
+  private int IntRecordNumber;
 
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
-  // -----------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------  
   @Override
-  public IRecord procValidRecord(IRecord r) {
-    TyfonRecord CurrentRecord = (TyfonRecord) r;
-
-    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
-            || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)) {
-      // check if this is one of the markup scenarios
-      searchParams[0] = CurrentRecord.supplier;
-      String markupType = getRegexMatch("Default", searchParams);
-
-      // If we got a match, process it
-      if (isValidRegexMatchResult(markupType)) {
-        // Mark that we are marking up and set the key
-        CurrentRecord.markupType = markupType;
-        CurrentRecord.isMarkup = true;
-      } else {
-        // Set that we are not marking up
-        CurrentRecord.markupType = "";
-        CurrentRecord.isMarkup = false;
-      }
-    }
+  public IRecord procHeader(IRecord r) {
+    IntRecordNumber = 0;
 
     return r;
   }
 
   @Override
+  public IRecord procValidRecord(IRecord r) {
+
+    TyfonRecord tmpDataRecord = null;
+    FlatRecord tmpFlatRecord = (FlatRecord) r;
+
+    // Check the record type - deal with each of the types separately
+    if (tmpFlatRecord.getData().matches(TyfonRecord.BAHNOF_TYPE_HEADER_PREFIX)) {
+      // Header record, just discard
+    } else if (tmpFlatRecord.getData().startsWith(TyfonRecord.RECYCLE_TAG)) {
+      // Recycled detail record
+      tmpDataRecord = new TyfonRecord();
+      tmpDataRecord.mapBahnhofDetailRecord(tmpFlatRecord.getData());
+      IntRecordNumber++;
+      tmpDataRecord.RecordNumber = IntRecordNumber;
+    } else {
+      // Normal detail record
+      tmpDataRecord = new TyfonRecord();
+      tmpDataRecord.mapBahnhofDetailRecord(tmpFlatRecord.getData());
+      IntRecordNumber++;
+      tmpDataRecord.RecordNumber = IntRecordNumber;
+    }
+
+    // Return the modified record in the Common record format (IRecord)
+    return (IRecord) tmpDataRecord;
+  }
+
+  @Override
   public IRecord procErrorRecord(IRecord r) {
+    return r;
+  }
+
+  @Override
+  public IRecord procTrailer(IRecord r) {
     return r;
   }
 }

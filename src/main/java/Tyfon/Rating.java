@@ -82,7 +82,8 @@ public class Rating extends AbstractRUMRateCalc {
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
     if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)) {
       try {
         performRating(CurrentRecord);
       } catch (ProcessingException pe) {

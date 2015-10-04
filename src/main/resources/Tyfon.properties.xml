@@ -13,6 +13,10 @@
       <Active>True</Active>
     </TelavoxPipe>
 
+    <BahnhofPipe>
+      <Active>True</Active>
+    </BahnhofPipe>
+
     <ProvisioningLoader>
       <Active>True</Active>
     </ProvisioningLoader>
@@ -286,6 +290,138 @@
     </OutputAdapter>
   </TelavoxPipe>
 
+  <BahnhofPipe>
+    <InputAdapter>
+      <BInpAdapter>
+        <ClassName>Tyfon.BahnhofInputAdapter</ClassName>
+        <BatchSize>5000</BatchSize>
+        <InputFilePath>Data/Tyfon</InputFilePath>
+        <InputFilePrefix>bahnhof_</InputFilePrefix>
+        <InputFileSuffix>.csv</InputFileSuffix>
+        <DoneFilePath>Data/Tyfon</DoneFilePath>
+        <DoneFilePrefix>bahnhof_</DoneFilePrefix>
+        <DoneFileSuffix>.done</DoneFileSuffix>
+        <ErrFilePath>Data/Tyfon</ErrFilePath>
+        <ErrFilePrefix>bahnhof_</ErrFilePrefix>
+        <ErrFileSuffix>.err</ErrFileSuffix>
+      </BInpAdapter>
+    </InputAdapter>
+
+    <Process>
+      <!-- Detect markup cases -->
+      <CallScenarioLookup>
+        <ClassName>Tyfon.CallScenarioLookup</ClassName>
+        <DataCache>CallScenarioCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </CallScenarioLookup>
+
+      <!-- Lookup the customer -->
+      <CustomerLookup>
+        <ClassName>Tyfon.CustomerLookup</ClassName>
+        <DataCache>CustomerCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </CustomerLookup>
+
+      <!-- Find the hierarchy of price plans -->
+      <PriceHierarchyLookup>
+        <ClassName>Tyfon.PriceHierarchyLookup</ClassName>
+        <DataCache>PriceHierarchyCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </PriceHierarchyLookup>
+
+      <!-- Identify premium calls -->
+      <PremiumLookup>
+        <ClassName>Tyfon.PremiumLookup</ClassName>
+        <DataCache>PremiumCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </PremiumLookup>
+
+      <!-- Create the charge packets - done here to allow time splitting -->
+      <ChargePacketCreation>
+        <ClassName>Tyfon.ChargePacketCreation</ClassName>
+        <BatchSize>5000</BatchSize>
+      </ChargePacketCreation>
+
+      <!-- Look up the destination zone, category and mobile/fixed status -->
+      <ZoneLookup>
+        <ClassName>Tyfon.ZoneLookup</ClassName>
+        <DataCache>ZoneCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </ZoneLookup>
+
+      <!-- Lookup the time zone -->
+      <TimeLookup>
+        <ClassName>Tyfon.TimeLookup</ClassName>
+        <DataCache>TimeCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </TimeLookup>
+
+      <!-- Lookup the price to use -->
+      <PriceLookup>
+        <ClassName>Tyfon.PriceLookup</ClassName>
+        <DataCache>PriceLookupCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </PriceLookup>
+
+      <!-- Perform rating -->
+      <RateLookup>
+        <ClassName>Tyfon.Rating</ClassName>
+        <DataCache>RateCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </RateLookup>
+
+      <!-- Rollup and round rating results -->
+      <RateRounding>
+        <ClassName>Tyfon.RateRounding</ClassName>
+        <BatchSize>5000</BatchSize>
+      </RateRounding>
+
+      <!-- Output record guiding -->
+      <SuspensePreparation>
+        <ClassName>Tyfon.SuspensePreparation</ClassName>
+        <DataCache>SuspensePreparationCache</DataCache>
+        <BatchSize>5000</BatchSize>
+      </SuspensePreparation>
+
+      <!-- Dump Diagnostic Information -->
+      <DumpFirst>
+        <ClassName>OpenRate.process.Dump</ClassName>
+        <Active>True</Active>
+        <DumpType>All</DumpType>
+        <DumpFilePath>Data/Tyfon</DumpFilePath>
+        <DumpFilePrefix>bahnhof_</DumpFilePrefix>
+        <DumpFileSuffix>.dump</DumpFileSuffix>
+        <BatchSize>5000</BatchSize>
+      </DumpFirst>
+    </Process>
+
+    <OutputAdapter>
+      <CGoodOutAdapter>
+        <ClassName>Tyfon.XMLOutputAdapter</ClassName>
+        <OutputName>GoodOutput</OutputName>
+        <BatchSize>5000</BatchSize>
+        <MaxSleep>50</MaxSleep>
+        <OutputFilePath>Data/Tyfon</OutputFilePath>
+        <OutputFilePrefix>bahnhof_</OutputFilePrefix>
+        <OutputFileSuffix>.xml</OutputFileSuffix>
+        <SingleOutputFile>True</SingleOutputFile>
+      </CGoodOutAdapter>
+
+      <CSuspOutAdapter>
+        <ClassName>Tyfon.TyfonOutputSuspenseAdapter</ClassName>
+        <OutputName>SuspenseOutput</OutputName>
+        <BatchSize>5000</BatchSize>
+        <MaxSleep>50</MaxSleep>
+        <OutputFilePath>Data/Tyfon</OutputFilePath>
+        <OutputFilePrefix>bahnhof_</OutputFilePrefix>
+        <OutputFileSuffix>.reject</OutputFileSuffix>
+        <DeleteEmptyOutputFile>True</DeleteEmptyOutputFile>
+        <SingleOutputFile>True</SingleOutputFile>
+      </CSuspOutAdapter>
+
+    </OutputAdapter>
+  </BahnhofPipe>
+  
   <!--========================================================-->
   <!--  used for processing records from provisioning files   -->
   <!--========================================================-->

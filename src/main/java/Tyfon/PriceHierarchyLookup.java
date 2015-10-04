@@ -73,7 +73,8 @@ public class PriceHierarchyLookup extends AbstractRegexMatch {
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
     if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)) {
       // check if this is one of the markup scenarios
       searchParams[0] = CurrentRecord.UsedProduct;
       String pricePlanList = getRegexMatch("Default", searchParams);

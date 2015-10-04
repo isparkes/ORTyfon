@@ -92,34 +92,14 @@ public class TyfonRecord extends RatingRecord {
   // Character used as a field splitter
   private static final String VENTELO_FIELD_SPLITTER = ";";
 
-  /**
-   * The type idenitfier for the incoming header record
-   */
+  // Input record types
   public final static String VENTELO_TYPE_HEADER = "100";
-
-  /**
-   * The type idenitfier for the incoming detail record
-   */
   public final static String VENTELO_TYPE_DETAIL = "300";
-
-  /**
-   * The type idenitfier for the incoming trailer record
-   */
   public final static String VENTELO_TYPE_TRAILER = "900";
 
-  /**
-   * Internal identifier for the header record
-   */
+  // processing record types
   public final static int VENTELO_HEADER_RECORD = 10;
-
-  /**
-   * Internal identifier for the detail record
-   */
   public final static int VENTELO_DETAIL_RECORD = 20;
-
-  /**
-   * Internal identifier for the trailer record
-   */
   public final static int VENTELO_TRAILER_RECORD = 90;
 
   // Header
@@ -147,22 +127,12 @@ public class TyfonRecord extends RatingRecord {
   // Character used as a field splitter
   private static final String TELAVOX_FIELD_SPLITTER = ";";
 
-  /**
-   * The type identifier for the incoming header record
-   */
+  // Input record prefixes
   public final static String TELAVOX_TYPE_HEADER = "100";
-
-  /**
-   * The type identifier for the incoming detail record
-   */
   public final static String TELAVOX_TYPE_DETAIL = "300";
-
-  /**
-   * The type identifier for the incoming trailer record
-   */
   public final static String TELAVOX_TYPE_TRAILER = "900";
 
-  // Records to be processed
+  // processing record types
   public final static int TELAVOX_DETAIL_RECORD = 21;
 
   // Detail Records
@@ -176,7 +146,7 @@ public class TyfonRecord extends RatingRecord {
   private final static int FIELD_T_CONN_COST_ORIG = 7;
   private final static int FIELD_T_TOTAL_COST_ORIG = 8;
 
-  // **************************** Telavox Definition ***************************
+  // **************************** Fraud Definition ***************************
   // Character used as a field splitter
   private static final String FRAUD_FIELD_SPLITTER = "\",\"";
 
@@ -200,6 +170,33 @@ public class TyfonRecord extends RatingRecord {
   private final static int FIELD_F_RESULT = 10;
   private final static int FIELD_F_DISPOSITION = 11;
 
+  // **************************** Bahnhof Definition ***************************
+  // Character used as a field splitter
+  public static final String BAHNHOF_FIELD_SPLITTER = ",";
+
+  // Used to identify the header record in the file
+  public final static String BAHNOF_TYPE_HEADER_PREFIX = ".*start_at.*";
+
+  // processing record types
+  public final static int BAHNHOF_DETAIL_RECORD = 23;
+
+  // Detail Records - bahnhof CDR format
+  public final static int FIELD_B_COUNT = 14;
+  public final static int FIELD_B_start_at = 0;
+  public final static int FIELD_B_cdr_source = 1;
+  public final static int FIELD_B_upstream_id = 2;
+  public final static int FIELD_B_caller = 3;
+  public final static int FIELD_B_callee = 4;
+  public final static int FIELD_B_duration = 5;
+  public final static int FIELD_B_dest_id = 6;
+  public final static int FIELD_B_category_id = 7;
+  public final static int FIELD_B_child_key = 8;
+  public final static int FIELD_B_amount = 9;
+  public final static int FIELD_B_vat_rate = 10;
+  public final static int FIELD_B_confidential = 11;
+  public final static int FIELD_B_description = 12;
+  public final static int FIELD_B_outgoing = 13;
+
   //  The record type is what allows us to determine what the records to handle
   //	are, and what to ignore. Generally you will need something of this type
   public static final String RECYCLE_TAG = "ORRECYCLE";
@@ -213,6 +210,7 @@ public class TyfonRecord extends RatingRecord {
   public String B_Number;         // Raw B Number
   public String B_NumberNorm;     // Normalised B number
   public String supplier = null;  // The supplier of the call record
+  public String direction = "";   // call direction, Originating or Terminating
 
   // Rating variables
   public String Destination;      // The zoning destination for the B Number
@@ -305,6 +303,7 @@ public class TyfonRecord extends RatingRecord {
     // Validate the number of fields
     if (fields.length == FIELD_V_COUNT) {
       Call_Date = getField(FIELD_V_CHARGING_START_DATE) + getField(FIELD_V_CHARGING_START_TIME);
+      direction = "Originating";
       A_Number = getField(FIELD_V_A_NUMBER);
       B_Number = getField(FIELD_V_B_NUMBER);
 
@@ -359,8 +358,125 @@ public class TyfonRecord extends RatingRecord {
   }
 
   /**
-   * Map a detail record from the telavox input source. We split up the record
-   * at the tabs, and put the information into fieldsso that we can manipulate
+   * Map a detail record from the Bahnhof input source. We split up the record
+   * at the tabs, and put the information into fields so that we can manipulate
+   * it as we want.
+   *
+   * @param inputData The input data to map
+   */
+  public void mapBahnhofDetailRecord(String inputData) {
+    // Set the record type
+    RECORD_TYPE = TyfonRecord.BAHNHOF_DETAIL_RECORD;
+
+    // Set the original data
+    OriginalData = inputData;
+
+    // Detect recycle case
+    if (OriginalData.startsWith(RECYCLE_TAG)) {
+      // RECYCLE_COUNT
+      StringBuffer record = new StringBuffer(OriginalData);
+
+      // remove RecycleTag from record
+      record = record.delete(0, record.indexOf(VENTELO_FIELD_SPLITTER) + 1);
+
+      // remove ErrorCode from record
+      record = record.delete(0, record.indexOf(VENTELO_FIELD_SPLITTER) + 1);
+
+      // Get the previous recycle count
+      String Recycle_CountStr = record.substring(0, record.indexOf(VENTELO_FIELD_SPLITTER));
+      recycleCount = Integer.parseInt(Recycle_CountStr);
+
+      // remove RecycleCount from record
+      record = record.delete(0, record.indexOf(VENTELO_FIELD_SPLITTER) + 1);
+
+      // reset the original data
+      OriginalData = record.toString();
+    }
+
+    // Split the fields up
+    fields = OriginalData.split(BAHNHOF_FIELD_SPLITTER);
+
+    // Validate the number of fields
+    if (fields.length == FIELD_B_COUNT) {
+      Call_Date = getField(FIELD_B_start_at);
+
+      if (getField(FIELD_B_outgoing).equals("1")) {
+        direction = "Originating";
+        A_Number = getField(FIELD_B_caller).replaceAll("\"", "");
+        B_Number = getField(FIELD_B_callee).replaceAll("\"", "");
+      } else {
+        direction = "Terminating";
+        A_Number = getField(FIELD_B_callee).replaceAll("\"", "");
+        B_Number = getField(FIELD_B_caller).replaceAll("\"", "");
+      }
+
+      try {
+        Call_Time = Integer.parseInt(getField(FIELD_B_duration));
+      } catch (NumberFormatException nfe) {
+        addError(new RecordError("ERR_DURATION_INVALID", ErrorType.DATA_VALIDATION));
+      }
+
+      try {
+        origAmount = Double.parseDouble(getField(FIELD_B_amount));
+      } catch (NumberFormatException nfe) {
+        addError(new RecordError("ERR_ORIG_PRICE_INVALID", ErrorType.DATA_VALIDATION));
+      }
+
+      // Get the supplier string for markup processing
+      supplier = getField(FIELD_B_cdr_source);
+
+      // A Number normalisation
+      if (A_Number.startsWith("46")) {
+        // replace the "46" prefix with "0"
+        A_Number = A_Number.replaceAll("^46", "0");
+      } else {
+        addError(new RecordError("ERR_A_NORM", ErrorType.DATA_VALIDATION));
+      }
+
+      // B Number normalisation
+      if (direction.equals("Originating")) {
+        if (B_Number.startsWith("00")) {
+          // Do nothing - it is already right
+          B_NumberNorm = B_Number;
+        } //Repair 118118 and others
+        else if (B_Number.length() < 7 && !B_Number.substring(1, 2).matches("0") && B_Number.substring(0, 2).matches("11")) {
+          B_NumberNorm = "0046" + B_Number;
+        } // All other
+        else {
+          B_NumberNorm = "00" + B_Number;
+        } // Default error case
+      } else {
+        B_Number = "";
+        B_NumberNorm = "";
+      }
+
+      // Get the CDR date
+      try {
+        SimpleDateFormat sdfInput = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        EventStartDate = sdfInput.parse(Call_Date);
+        UTCEventDate = EventStartDate.getTime() / 1000;
+      } catch (ParseException ex) {
+        addError(new RecordError("ERR_DATE_INVALID", ErrorType.DATA_VALIDATION));
+      }
+
+      if (direction.equals("Terminating")) {
+        addError(new RecordError("ERR_TERMINATING", ErrorType.DATA_VALIDATION));
+      }
+
+      // Set the RUMS duration and original rated amount (for markup)
+      setRUMValue("DUR", Call_Time);
+      setRUMValue("SEK", origAmount);
+
+      // Set the default service
+      Service = "TEL";
+    } else {
+      addError(new RecordError("ERR_FIELD_COUNT", ErrorType.DATA_VALIDATION));
+    }
+  }
+
+  /**
+   * Map a detail record from the Telavox input source. We split up the record
+   * at the tabs, and put the information into fields so that we can manipulate
    * it as we want.
    *
    * @param inputData The input data to map
@@ -459,8 +575,7 @@ public class TyfonRecord extends RatingRecord {
   }
 
   /**
-   * Reconstruct the record from the field values, replacing the original
-   * structure of tab separated records
+   * Reconstruct the record from the field values
    *
    * @return The unmapped original data
    */
@@ -498,10 +613,10 @@ public class TyfonRecord extends RatingRecord {
   }
 
   /**
-   * Reconstruct the record from the field values, replacing the original
-   * structure of tab separated records
+   * Reconstruct the record from the field values, prefixing it with the Recycle
+   * tag
    *
-   * @return The unmapped original data
+   * @return The unmapped data
    */
   public String unmapVenteloSuspenseData() {
     StringBuffer tmpReassemble;
@@ -538,10 +653,10 @@ public class TyfonRecord extends RatingRecord {
   }
 
   /**
-   * Reconstruct the record from the field values, replacing the original
-   * structure of tab separated records
+   * Reconstruct the record from the field values, prefixing it with the Recycle
+   * tag
    *
-   * @return The unmapped original data
+   * @return The unmapped data
    */
   String unmapTelavoxSuspenseData() {
     StringBuffer tmpReassemble;
@@ -566,6 +681,46 @@ public class TyfonRecord extends RatingRecord {
       tmpReassemble.append(TELAVOX_FIELD_SPLITTER);
       tmpReassemble.append(recycleCount);
       tmpReassemble.append(TELAVOX_FIELD_SPLITTER);
+
+      // Now the original record
+      tmpReassemble.append(OriginalData);
+
+      return tmpReassemble.toString();
+    } else {
+      // just return the untampered with original
+      return OriginalData;
+    }
+  }
+
+  /**
+   * Reconstruct the record from the field values, prefixing it with the Recycle
+   * tag
+   *
+   * @return The unmapped data
+   */
+  String unmapBahnhofSuspenseData() {
+    StringBuffer tmpReassemble;
+
+    if (RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD) {
+      // We use the string buffer for the reassembly of the record. Avoid
+      // just catenating strings, as it is a LOT slower because of the
+      // java internal string handling (it has to allocate/deallocate many
+      // times to rebuild the string).
+      tmpReassemble = new StringBuffer(1024);
+
+      // Write the error information back, including the recycle header
+      String errorCode = this.getErrors().get(0).getMessage();
+
+      // Increment the recycle count
+      recycleCount++;
+
+      // Put the header on
+      tmpReassemble.append(RECYCLE_TAG);
+      tmpReassemble.append(VENTELO_FIELD_SPLITTER);
+      tmpReassemble.append(errorCode);
+      tmpReassemble.append(VENTELO_FIELD_SPLITTER);
+      tmpReassemble.append(recycleCount);
+      tmpReassemble.append(VENTELO_FIELD_SPLITTER);
 
       // Now the original record
       tmpReassemble.append(OriginalData);
@@ -672,16 +827,19 @@ public class TyfonRecord extends RatingRecord {
     // Format the fields
     // We only transform the detail records, and leave the others alone
     if ((RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-            || (RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
+            || (RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)) {
       tmpDumpList.add("============ BEGIN RECORD ============");
       tmpDumpList.add("  Record Number         = <" + RecordNumber + ">");
       tmpDumpList.add("  Outputs               = <" + outputs + ">");
+      tmpDumpList.add("  Original data         = <" + OriginalData + ">");
       tmpDumpList.add("--------------------------------------");
       tmpDumpList.add("  Call_Date             = <" + Call_Date + ">");
       tmpDumpList.add("  Call_Time             = <" + Call_Time + ">");
       tmpDumpList.add("  A_Number              = <" + A_Number + ">");
       tmpDumpList.add("  B_Number              = <" + B_Number + ">");
       tmpDumpList.add("  OrigRatedAmount       = <" + origAmount + ">");
+      tmpDumpList.add("  Direction             = <" + direction + ">");
       tmpDumpList.add("--------------------------------------");
       tmpDumpList.add("  CustIDA               = <" + CustIDA + ">");
       tmpDumpList.add("  Subscription ID       = <" + subscriptionID + ">");
@@ -711,6 +869,7 @@ public class TyfonRecord extends RatingRecord {
       tmpDumpList.add("============ FRAUD RECORD ============");
       tmpDumpList.add("  Record Number         = <" + RecordNumber + ">");
       tmpDumpList.add("  Outputs               = <" + outputs + ">");
+      tmpDumpList.add("  Original data         = <" + OriginalData + ">");
       tmpDumpList.add("--------------------------------------");
       tmpDumpList.add("  START_TIME            = <" + getField(FIELD_F_START_TIME) + ">");
       tmpDumpList.add("  END_TIME              = <" + getField(FIELD_F_END_TIME) + ">");

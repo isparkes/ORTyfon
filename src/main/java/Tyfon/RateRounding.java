@@ -77,9 +77,9 @@ public class RateRounding extends AbstractStubPlugIn {
 
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
-    // We only transform the detail records, and leave the others alone
     if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)) {
       // No custom rate so use the standard one
       // pick out the connect cost part and create the steps serialisation
       Iterator<ChargePacket> cpIter = CurrentRecord.getChargePackets().iterator();

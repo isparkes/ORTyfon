@@ -45,16 +45,6 @@
  * Half International.
  * ====================================================================
  */
-/* ========================== VERSION HISTORY =========================
- * $Log: TimeLookup.java,v $
- * Revision 1.3  2012-10-17 18:14:23  ian
- * Update for release
- *
- * Revision 1.2  2012-07-17 22:32:49  ian
- * WIP
- *
- * ====================================================================
- */
 package Tyfon;
 
 import OpenRate.process.AbstractTimeMatch;
@@ -81,7 +71,8 @@ public class TimeLookup extends AbstractTimeMatch {
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
     if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)) {
       // Put the time result into the charge packets
       for (ChargePacket tmpCP : CurrentRecord.getChargePackets()) {
         CurrentRecord.TimeZone = getTimeZone(tmpCP.timeModel, CurrentRecord.UTCEventDate);

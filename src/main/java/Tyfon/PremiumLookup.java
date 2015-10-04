@@ -53,37 +53,33 @@ import OpenRate.record.IRecord;
 /**
  * Look up numbers which have a special premium rate attached to them.
  */
-public class PremiumLookup extends AbstractRegexMatch
-{
+public class PremiumLookup extends AbstractRegexMatch {
 
   // Regex search parameters - defined here for performance reasons
   private final String[] tmpSearchParameters = new String[1];
-  
+
   // -----------------------------------------------------------------------------
   // ------------------ Start of inherited Plug In functions ---------------------
   // -----------------------------------------------------------------------------
-
   @Override
-  public IRecord procValidRecord(IRecord r)
-  {
+  public IRecord procValidRecord(IRecord r) {
     String RegexGroup;
     String RegexResult;
-    TyfonRecord CurrentRecord = (TyfonRecord)r;
+    TyfonRecord CurrentRecord = (TyfonRecord) r;
 
-    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD) ||
-        (CurrentRecord.RECORD_TYPE == TyfonRecord.FRAUD_DETAIL_RECORD))
-    {
+    if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.FRAUD_DETAIL_RECORD)) {
       // Prepare the paramters to perform the search on
-      tmpSearchParameters[0] = CurrentRecord.B_NumberNorm;      
-      
+      tmpSearchParameters[0] = CurrentRecord.B_NumberNorm;
+
       RegexGroup = "PREM";
-      
+
       // Look up the rate model to use
-      RegexResult = getRegexMatch(RegexGroup,tmpSearchParameters);
-      
-      if( !"NOMATCH".equals(RegexResult) )
-      {
+      RegexResult = getRegexMatch(RegexGroup, tmpSearchParameters);
+
+      if (!"NOMATCH".equals(RegexResult)) {
         CurrentRecord.isPremium = true;
       }
     }
@@ -92,8 +88,7 @@ public class PremiumLookup extends AbstractRegexMatch
   }
 
   @Override
-  public IRecord procErrorRecord(IRecord r)
-  {
+  public IRecord procErrorRecord(IRecord r) {
     // Nothing to do
     return r;
   }

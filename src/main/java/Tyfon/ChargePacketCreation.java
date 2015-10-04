@@ -80,7 +80,8 @@ public class ChargePacketCreation extends AbstractStubPlugIn {
     TyfonRecord CurrentRecord = (TyfonRecord) r;
 
     if ((CurrentRecord.RECORD_TYPE == TyfonRecord.VENTELO_DETAIL_RECORD)
-            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)) {
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD)
+            || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)) {
       if (CurrentRecord.isMarkup) {
         // Just create a single CP for markup
         // ****************** Add the retail packet ********************

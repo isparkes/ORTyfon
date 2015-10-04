@@ -78,6 +78,10 @@ public class TyfonOutputSuspenseAdapter extends FlatFileOutputAdapter {
       tmpOutRecord = new FlatRecord();
       tmpOutRecord.setData(CurrentRecord.unmapTelavoxSuspenseData());
       Outbatch.add((IRecord) tmpOutRecord);
+    } else if (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD) {
+      tmpOutRecord = new FlatRecord();
+      tmpOutRecord.setData(CurrentRecord.unmapBahnhofSuspenseData());
+      Outbatch.add((IRecord) tmpOutRecord);
     }
 
     return Outbatch;
@@ -101,6 +105,10 @@ public class TyfonOutputSuspenseAdapter extends FlatFileOutputAdapter {
     } else if (CurrentRecord.RECORD_TYPE == TyfonRecord.TELAVOX_DETAIL_RECORD) {
       tmpOutRecord = new FlatRecord();
       tmpOutRecord.setData(CurrentRecord.unmapTelavoxSuspenseData());
+      Outbatch.add((IRecord) tmpOutRecord);
+    } else if (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD) {
+      tmpOutRecord = new FlatRecord();
+      tmpOutRecord.setData(CurrentRecord.unmapBahnhofSuspenseData());
       Outbatch.add((IRecord) tmpOutRecord);
     }
 
