@@ -183,15 +183,15 @@ public class FraudKeyCalculation extends AbstractPersistentObjectProcess {
     // We only transform the detail records, and leave the others alone
     if (CurrentRecord.RECORD_TYPE == TyfonRecord.FRAUD_DETAIL_RECORD) {
 
-      // Call_Date has the date in it in the format yyyymmdd
+      // callDate has the date in it in the format yyyymmdd
       // Get the daily key
-      String dailyKey = CurrentRecord.Call_Date.substring(0, 8);
+      String dailyKey = CurrentRecord.callDate.substring(0, 8);
 
       // Get the monthly key
-      String monthlyKey = CurrentRecord.Call_Date.substring(0, 6);
+      String monthlyKey = CurrentRecord.callDate.substring(0, 6);
 
       // Get the hourly key
-      String hourlyKey = CurrentRecord.Call_Date.substring(0, 10);
+      String hourlyKey = CurrentRecord.callDate.substring(0, 10);
 
       // Calcualate aggregations per customer
       String aggKeyCustomer = CurrentRecord.CustIDA + ".";
@@ -203,15 +203,15 @@ public class FraudKeyCalculation extends AbstractPersistentObjectProcess {
       // **************************** Duration Total ***************************
       // The key for monthly aggregation
       String aggKeyCustomerTotalMonthly = aggKeyCustomerMonthly + ".TotDur";
-      checkBalance(CurrentRecord, aggKeyCustomerTotalMonthly, CurrentRecord.Call_Time, monthlyTotalDurationLimit, "Monthly total duration");
+      checkBalance(CurrentRecord, aggKeyCustomerTotalMonthly, CurrentRecord.callTime, monthlyTotalDurationLimit, "Monthly total duration");
 
       // The key for daily aggregation
       String aggKeyCustomerTotalDaily = aggKeyCustomerDaily + ".TotDur";
-      checkBalance(CurrentRecord, aggKeyCustomerTotalDaily, CurrentRecord.Call_Time, dailyTotalDurationLimit, "Daily total duration");
+      checkBalance(CurrentRecord, aggKeyCustomerTotalDaily, CurrentRecord.callTime, dailyTotalDurationLimit, "Daily total duration");
 
 //      // The key for hourly aggregation
 //      String aggKeyCustomerTotalHourly = aggKeyCustomerHourly + ".TotDur";
-//      checkBalance(CurrentRecord, aggKeyCustomerTotalHourly, CurrentRecord.Call_Time, hourlyTotalDurationLimit, "Hourly total duration");
+//      checkBalance(CurrentRecord, aggKeyCustomerTotalHourly, CurrentRecord.callTime, hourlyTotalDurationLimit, "Hourly total duration");
       // ************************* Duration Call types *************************
       // The keys for the call type
       String callType = CurrentRecord.Dest_Phone_Type;
@@ -220,13 +220,13 @@ public class FraudKeyCalculation extends AbstractPersistentObjectProcess {
       }
 
       String aggKeyCustomerDestMonthly = aggKeyCustomerMonthly + ".Dur." + callType;
-      checkBalance(CurrentRecord, aggKeyCustomerDestMonthly, CurrentRecord.Call_Time, monthlyCallTypeDurationLimit, "Monthly " + callType + " duration");
+      checkBalance(CurrentRecord, aggKeyCustomerDestMonthly, CurrentRecord.callTime, monthlyCallTypeDurationLimit, "Monthly " + callType + " duration");
 
       String aggKeyCustomerDestDaily = aggKeyCustomerDaily + ".Dur." + callType;
-      checkBalance(CurrentRecord, aggKeyCustomerDestDaily, CurrentRecord.Call_Time, dailyCallTypeDurationLimit, "Daily " + callType + " duration");
+      checkBalance(CurrentRecord, aggKeyCustomerDestDaily, CurrentRecord.callTime, dailyCallTypeDurationLimit, "Daily " + callType + " duration");
 
 //      String aggKeyCustomerDestHourly = aggKeyCustomerHourly + ".Dur." + callType;
-//      checkBalance(CurrentRecord, aggKeyCustomerDestHourly, CurrentRecord.Call_Time, hourlyCallTypeDurationLimit, "Hourly " + callType + " duration");
+//      checkBalance(CurrentRecord, aggKeyCustomerDestHourly, CurrentRecord.callTime, hourlyCallTypeDurationLimit, "Hourly " + callType + " duration");
       // ***************************** Call Counts *****************************
       // The key for monthly aggregation
       String aggKeyCustomerCountMonthly = aggKeyCustomerMonthly + ".TotCnt";

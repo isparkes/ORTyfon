@@ -51,9 +51,11 @@ import OpenRate.record.ErrorType;
 import OpenRate.record.RatingRecord;
 import OpenRate.record.RecordError;
 import fraud.FraudAlert;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.TimeZone;
 
 /**
  * A Record corresponds to a unit of work that is being processed by the
@@ -204,8 +206,8 @@ public class TyfonRecord extends RatingRecord {
   private static final long serialVersionUID = 732626781L;
 
   // CDR related variables
-  public String Call_Date = null; // Date of the call
-  public int Call_Time;        // Duration of the call
+  public String callDate = null; // Date of the call
+  public int callTime;        // Duration of the call
   public String A_Number;         // Raw A Number
   public String B_Number;         // Raw B Number
   public String B_NumberNorm;     // Normalised B number
@@ -216,7 +218,7 @@ public class TyfonRecord extends RatingRecord {
   public String Destination;      // The zoning destination for the B Number
   public String Zone_Cat;         // The category for the B Number
   public String Dest_Phone_Type;  // The type of number
-  public String TimeZone;         // The time zone
+  public String TimeResult;         // The time zone
   //public String RetailPriceGroup; // The retail price group
   public Boolean isPremium = false;
 
@@ -302,13 +304,13 @@ public class TyfonRecord extends RatingRecord {
 
     // Validate the number of fields
     if (fields.length == FIELD_V_COUNT) {
-      Call_Date = getField(FIELD_V_CHARGING_START_DATE) + getField(FIELD_V_CHARGING_START_TIME);
+      callDate = getField(FIELD_V_CHARGING_START_DATE) + getField(FIELD_V_CHARGING_START_TIME);
       direction = "Originating";
       A_Number = getField(FIELD_V_A_NUMBER);
       B_Number = getField(FIELD_V_B_NUMBER);
 
       try {
-        Call_Time = Integer.parseInt(getField(FIELD_V_DURATION));
+        callTime = Integer.parseInt(getField(FIELD_V_DURATION));
       } catch (NumberFormatException nfe) {
         addError(new RecordError("ERR_DURATION_INVALID", ErrorType.DATA_VALIDATION));
       }
@@ -340,14 +342,14 @@ public class TyfonRecord extends RatingRecord {
       // Get the CDR date
       try {
         SimpleDateFormat sdfInput = new SimpleDateFormat("yyyyMMddHHmmss");
-        EventStartDate = sdfInput.parse(Call_Date);
+        EventStartDate = sdfInput.parse(callDate);
         UTCEventDate = EventStartDate.getTime() / 1000;
       } catch (ParseException ex) {
         addError(new RecordError("ERR_DATE_INVALID", ErrorType.DATA_VALIDATION));
       }
 
       // Set the RUMS duration and original rated amount (for markup)
-      setRUMValue("DUR", Call_Time);
+      setRUMValue("DUR", callTime);
       setRUMValue("SEK", origAmount);
 
       // Set the default service
@@ -398,7 +400,7 @@ public class TyfonRecord extends RatingRecord {
 
     // Validate the number of fields
     if (fields.length == FIELD_B_COUNT) {
-      Call_Date = getField(FIELD_B_start_at);
+      callDate = getField(FIELD_B_start_at);
 
       if (getField(FIELD_B_outgoing).equals("1")) {
         direction = "Originating";
@@ -411,7 +413,7 @@ public class TyfonRecord extends RatingRecord {
       }
 
       try {
-        Call_Time = Integer.parseInt(getField(FIELD_B_duration));
+        callTime = Integer.parseInt(getField(FIELD_B_duration));
       } catch (NumberFormatException nfe) {
         addError(new RecordError("ERR_DURATION_INVALID", ErrorType.DATA_VALIDATION));
       }
@@ -452,8 +454,12 @@ public class TyfonRecord extends RatingRecord {
 
       // Get the CDR date
       try {
-        SimpleDateFormat sdfInput = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-        EventStartDate = sdfInput.parse(Call_Date);
+        DateFormat sdfInput = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        sdfInput.setTimeZone(TimeZone.getTimeZone("Zulu"));
+        EventStartDate = sdfInput.parse(callDate);
+        DateFormat sdfOutput = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        sdfOutput.setTimeZone(TimeZone.getTimeZone("Europe/Stockholm"));
+        callDate = sdfOutput.format(EventStartDate);
         UTCEventDate = EventStartDate.getTime() / 1000;
       } catch (ParseException ex) {
         addError(new RecordError("ERR_DATE_INVALID", ErrorType.DATA_VALIDATION));
@@ -464,7 +470,7 @@ public class TyfonRecord extends RatingRecord {
       }
 
       // Set the RUMS duration and original rated amount (for markup)
-      setRUMValue("DUR", Call_Time);
+      setRUMValue("DUR", callTime);
       setRUMValue("SEK", origAmount);
 
       // Set the default service
@@ -513,12 +519,12 @@ public class TyfonRecord extends RatingRecord {
     // Split the fields up
     fields = OriginalData.split(TELAVOX_FIELD_SPLITTER);
 
-    Call_Date = getField(FIELD_T_CALL_DATE) + getField(FIELD_T_CALL_TIME);
+    callDate = getField(FIELD_T_CALL_DATE) + getField(FIELD_T_CALL_TIME);
     A_Number = getField(FIELD_T_A_NUMBER);
     B_Number = getField(FIELD_T_B_NUMBER);
 
     try {
-      Call_Time = Integer.parseInt(getField(FIELD_T_DURATION));
+      callTime = Integer.parseInt(getField(FIELD_T_DURATION));
     } catch (NumberFormatException nfe) {
       addError(new RecordError("ERR_DURATION_INVALID", ErrorType.DATA_VALIDATION));
     }
@@ -549,14 +555,14 @@ public class TyfonRecord extends RatingRecord {
     // Get the CDR date
     try {
       SimpleDateFormat sdfInput = new SimpleDateFormat("yyyyMMddHHmmss");
-      EventStartDate = sdfInput.parse(Call_Date);
+      EventStartDate = sdfInput.parse(callDate);
       UTCEventDate = EventStartDate.getTime() / 1000;
     } catch (ParseException ex) {
       addError(new RecordError("ERR_DATE_INVALID", ErrorType.DATA_VALIDATION));
     }
 
     // Set the RUMS duration and original rated amount (for markup)
-    setRUMValue("DUR", Call_Time);
+    setRUMValue("DUR", callTime);
     setRUMValue("SEK", origAmount);
 
     // Set the default service
@@ -751,13 +757,13 @@ public class TyfonRecord extends RatingRecord {
       setField(FIELD_F_START_TIME, getField(FIELD_F_START_TIME).replaceAll("\"", ""));
       setField(FIELD_F_DISPOSITION, getField(FIELD_F_DISPOSITION).replaceAll("\"", ""));
 
-      Call_Date = getField(FIELD_F_START_TIME).replaceAll("\"", "");
+      callDate = getField(FIELD_F_START_TIME).replaceAll("\"", "");
       A_Number = getField(FIELD_F_A_NUMBER);
       B_Number = getField(FIELD_F_B_NUMBER);
 
       try {
         // Using the call duration rather than the billable duration
-        Call_Time = Integer.parseInt(getField(FIELD_F_CALL_DUR));
+        callTime = Integer.parseInt(getField(FIELD_F_CALL_DUR));
       } catch (NumberFormatException nfe) {
         addError(new RecordError("ERR_DURATION_INVALID", ErrorType.DATA_VALIDATION));
       }
@@ -786,12 +792,12 @@ public class TyfonRecord extends RatingRecord {
       // Get the CDR date
       try {
         SimpleDateFormat sdfInput = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        EventStartDate = sdfInput.parse(Call_Date);
+        EventStartDate = sdfInput.parse(callDate);
         UTCEventDate = EventStartDate.getTime() / 1000;
         SimpleDateFormat sdfOutput = new SimpleDateFormat("yyyyMMddHHmmss");
 
         // Prepare the short date for Fraud
-        Call_Date = sdfOutput.format(EventStartDate);
+        callDate = sdfOutput.format(EventStartDate);
       } catch (ParseException ex) {
         addError(new RecordError("ERR_DATE_INVALID", ErrorType.DATA_VALIDATION));
       }
@@ -834,8 +840,8 @@ public class TyfonRecord extends RatingRecord {
       tmpDumpList.add("  Outputs               = <" + outputs + ">");
       tmpDumpList.add("  Original data         = <" + OriginalData + ">");
       tmpDumpList.add("--------------------------------------");
-      tmpDumpList.add("  Call_Date             = <" + Call_Date + ">");
-      tmpDumpList.add("  Call_Time             = <" + Call_Time + ">");
+      tmpDumpList.add("  Call_Date             = <" + callDate + ">");
+      tmpDumpList.add("  Call_Time             = <" + callTime + ">");
       tmpDumpList.add("  A_Number              = <" + A_Number + ">");
       tmpDumpList.add("  B_Number              = <" + B_Number + ">");
       tmpDumpList.add("  OrigRatedAmount       = <" + origAmount + ">");
@@ -848,7 +854,7 @@ public class TyfonRecord extends RatingRecord {
       tmpDumpList.add("  Destination           = <" + Destination + ">");
       tmpDumpList.add("  Zone_Cat              = <" + Zone_Cat + ">");
       tmpDumpList.add("  Dest_Phone_Type       = <" + Dest_Phone_Type + ">");
-      tmpDumpList.add("  TimeZone              = <" + TimeZone + ">");
+      tmpDumpList.add("  TimeZone              = <" + TimeResult + ">");
       tmpDumpList.add("  Supplier              = <" + supplier + ">");
       tmpDumpList.add("  Markup                = <" + isMarkup + ">");
       tmpDumpList.add("  Markup Type           = <" + markupType + ">");
@@ -884,8 +890,8 @@ public class TyfonRecord extends RatingRecord {
       tmpDumpList.add("  RESULT                = <" + getField(FIELD_F_RESULT) + ">");
       tmpDumpList.add("  DISPOSITION           = <" + getField(FIELD_F_DISPOSITION) + ">");
       tmpDumpList.add("--------------------------------------");
-      tmpDumpList.add("  Call_Date             = <" + Call_Date + ">");
-      tmpDumpList.add("  Call_Time             = <" + Call_Time + ">");
+      tmpDumpList.add("  Call_Date             = <" + callDate + ">");
+      tmpDumpList.add("  Call_Time             = <" + callTime + ">");
       tmpDumpList.add("  A_Number              = <" + A_Number + ">");
       tmpDumpList.add("  B_Number              = <" + B_Number + ">");
       tmpDumpList.add("--------------------------------------");

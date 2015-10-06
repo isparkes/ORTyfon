@@ -84,8 +84,8 @@ public class DBOutput extends JDBCOutputAdapter {
     tmpDataRecord.setOutputColumnInt(0, tmpInRecord.CustIDA);
     tmpDataRecord.setOutputColumnString(1, tmpInRecord.A_Number);
     tmpDataRecord.setOutputColumnString(2, tmpInRecord.B_Number);
-    tmpDataRecord.setOutputColumnString(3, tmpInRecord.Call_Date);
-    tmpDataRecord.setOutputColumnInt(4, tmpInRecord.Call_Time);
+    tmpDataRecord.setOutputColumnString(3, tmpInRecord.callDate);
+    tmpDataRecord.setOutputColumnInt(4, tmpInRecord.callTime);
     //tmpDataRecord.setOutputColumnDouble(5,tmpInRecord.RatedAmount);      
     tmpDataRecord.setOutputColumnString(6, tmpInRecord.Zone_Cat);
     tmpDataRecord.setOutputColumnString(7, tmpInRecord.Dest_Phone_Type);

@@ -83,8 +83,8 @@ public class DBOutputASuspense extends JDBCOutputAdapter {
     tmpDataRecord.setOutputColumnCount(4);
     tmpDataRecord.setOutputColumnString(0, tmpInRecord.A_Number);
     tmpDataRecord.setOutputColumnString(1, tmpInRecord.B_Number);
-    tmpDataRecord.setOutputColumnString(2, tmpInRecord.Call_Date);
-    tmpDataRecord.setOutputColumnInt(3, tmpInRecord.Call_Time);
+    tmpDataRecord.setOutputColumnString(2, tmpInRecord.callDate);
+    tmpDataRecord.setOutputColumnInt(3, tmpInRecord.callTime);
 
     Outbatch.add((IRecord) tmpDataRecord);
 
@@ -104,8 +104,8 @@ public class DBOutputASuspense extends JDBCOutputAdapter {
     tmpDataRecord.setOutputColumnCount(4);
     tmpDataRecord.setOutputColumnString(0, tmpInRecord.A_Number);
     tmpDataRecord.setOutputColumnString(1, tmpInRecord.B_Number);
-    tmpDataRecord.setOutputColumnString(2, tmpInRecord.Call_Date);
-    tmpDataRecord.setOutputColumnInt(3, tmpInRecord.Call_Time);
+    tmpDataRecord.setOutputColumnString(2, tmpInRecord.callDate);
+    tmpDataRecord.setOutputColumnInt(3, tmpInRecord.callTime);
 
     Outbatch.add((IRecord) tmpDataRecord);
 

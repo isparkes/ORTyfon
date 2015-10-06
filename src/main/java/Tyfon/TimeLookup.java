@@ -75,9 +75,9 @@ public class TimeLookup extends AbstractTimeMatch {
             || (CurrentRecord.RECORD_TYPE == TyfonRecord.BAHNHOF_DETAIL_RECORD)) {
       // Put the time result into the charge packets
       for (ChargePacket tmpCP : CurrentRecord.getChargePackets()) {
-        CurrentRecord.TimeZone = getTimeZone(tmpCP.timeModel, CurrentRecord.UTCEventDate);
+        CurrentRecord.TimeResult = getTimeZone(tmpCP.timeModel, CurrentRecord.UTCEventDate);
         TimePacket tmpTZ = new TimePacket();
-        tmpTZ.timeResult = CurrentRecord.TimeZone;
+        tmpTZ.timeResult = CurrentRecord.TimeResult;
         tmpCP.addTimeZone(tmpTZ);
       }
     }
