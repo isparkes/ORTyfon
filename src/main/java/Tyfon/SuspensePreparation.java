@@ -73,7 +73,6 @@ public class SuspensePreparation
 
   // Output definitions
   private static final String GOOD_OUTPUT = "GoodOutput";
-  private static final String BAL_OUTPUT = "BalanceOutput";
   private static final String SUSPENSE_OUTPUT = "SuspenseOutput";
 
   @Override
@@ -118,8 +117,8 @@ public class SuspensePreparation
           outputList = RegexResult.split(",");
 
           // add all outputs
-          for (int idx = 0; idx < outputList.length; idx++) {
-            CurrentRecord.addOutput(outputList[idx]);
+          for (String outputList1 : outputList) {
+            CurrentRecord.addOutput(outputList1);
           }
         } else {
           // Default behaviour
